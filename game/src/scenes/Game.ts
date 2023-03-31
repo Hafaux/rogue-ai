@@ -1,16 +1,18 @@
-import config from "../config";
-import ParallaxBackground from "../prefabs/ParallaxBackground";
 import { Player } from "../prefabs/Player";
 import Scene from "../core/Scene";
 import { CompositeTilemap } from "@pixi/tilemap";
 
-import helloFromBackend from "@rogueai/backend";
+import EnemySystem from "../systems/EnemySystem";
+import { Ticker } from "pixi.js";
 
 export default class Game extends Scene {
   name = "Game";
 
-  private player: Player | undefined;
-  private background: ParallaxBackground | undefined;
+  private player!: Player;
+
+  systems: System[] = [];
+
+  enemySystem!: EnemySystem;
 
   load() {
     this.player = new Player();
@@ -18,6 +20,18 @@ export default class Game extends Scene {
     this.player.x = window.innerWidth / 2;
     this.player.y = window.innerHeight - this.player.height / 3;
 
+    this.addBackground();
+
+    this.enemySystem = new EnemySystem(this, this.player);
+
+    this.addSystem(this.enemySystem);
+
+    Ticker.shared.add((delta) => {
+      this.updateSystems(delta);
+    });
+  }
+
+  addBackground() {
     const tilemap = new CompositeTilemap();
 
     const width = 50;
@@ -33,8 +47,17 @@ export default class Game extends Scene {
     }
 
     this.addChild(tilemap);
+  }
 
-    helloFromBackend();
+  spawnEnemies() {
+    const enemiesAmount = 10;
+
+    for (let i = 0; i < enemiesAmount; i++) {
+      this.enemySystem.spawnEnemy(
+        Math.random() * 700 + 100,
+        Math.random() * 700 + 100
+      );
+    }
   }
 
   onResize(width: number, height: number) {
@@ -42,9 +65,15 @@ export default class Game extends Scene {
       this.player.x = width / 2;
       this.player.y = height - this.player.height / 3;
     }
+  }
 
-    if (this.background) {
-      this.background.resize(width, height);
+  addSystem(system: System) {
+    this.systems.push(system);
+  }
+
+  updateSystems(delta: number) {
+    for (const system of this.systems) {
+      system.update(delta);
     }
   }
 }
