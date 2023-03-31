@@ -1,0 +1,24 @@
+{
+  "name": "rogueai-monorepo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "game/src/main.ts",
+  "workspaces": [
+    "game",
+    "backend"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Team-9-HACKAUBG/RogueAI.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Team-9-HACKAUBG/RogueAI/issues"
+  },
+  "homepage": "https://github.com/Team-9-HACKAUBG/RogueAI#readme"
+}
