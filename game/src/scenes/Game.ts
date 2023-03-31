@@ -1,4 +1,3 @@
-import ParallaxBackground from "../prefabs/ParallaxBackground";
 import { Player } from "../prefabs/Player";
 import Scene from "../core/Scene";
 import { CompositeTilemap } from "@pixi/tilemap";
@@ -10,8 +9,7 @@ import { Ticker } from "pixi.js";
 export default class Game extends Scene {
   name = "Game";
 
-  private player: Player | undefined;
-  private background: ParallaxBackground | undefined;
+  private player!: Player;
 
   systems: System[] = [];
 
@@ -46,7 +44,10 @@ export default class Game extends Scene {
     const enemiesAmount = 10;
 
     for (let i = 0; i < enemiesAmount; i++) {
-      this.enemySystem.spawnEnemy(300, 300);
+      this.enemySystem.spawnEnemy(
+        Math.random() * 700 + 100,
+        Math.random() * 700 + 100
+      );
     }
 
     this.addSystem(this.enemySystem);
@@ -60,10 +61,6 @@ export default class Game extends Scene {
     if (this.player) {
       this.player.x = width / 2;
       this.player.y = height - this.player.height / 3;
-    }
-
-    if (this.background) {
-      this.background.resize(width, height);
     }
   }
 
