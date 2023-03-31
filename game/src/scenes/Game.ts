@@ -30,9 +30,9 @@ export default class Game extends Scene {
     this.playerSystem = new PlayerSystem(this.player);
     this.addSystem(this.playerSystem);
 
-    this.spawnEnemies();
-
     this.addChild(this.player);
+
+    this.spawnEnemies();
 
     Ticker.shared.add((delta) => {
       this.updateSystems(delta);

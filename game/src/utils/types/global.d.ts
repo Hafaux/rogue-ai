@@ -13,3 +13,8 @@ interface System {
 interface Window {
   __PIXI_APP__: unknown;
 }
+
+type Vec2D<T = number> = {
+  x: T;
+  y: T;
+};
