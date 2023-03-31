@@ -1,4 +1,3 @@
-import config from "../config";
 import ParallaxBackground from "../prefabs/ParallaxBackground";
 import { Player } from "../prefabs/Player";
 import Scene from "../core/Scene";
