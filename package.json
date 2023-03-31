@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/Team-9-HACKAUBG/RogueAI/issues"
   },
-  "homepage": "https://github.com/Team-9-HACKAUBG/RogueAI#readme"
+  "homepage": "https://github.com/Team-9-HACKAUBG/RogueAI#readme",
+  "dependencies": {
+    "@pixi/tilemap": "^4.0.0"
+  }
 }
