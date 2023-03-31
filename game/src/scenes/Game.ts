@@ -5,12 +5,18 @@ import Scene from "../core/Scene";
 import { CompositeTilemap } from "@pixi/tilemap";
 
 import helloFromBackend from "@rogueai/backend";
+import EnemySystem from "../systems/EnemySystem";
+import { Ticker } from "pixi.js";
 
 export default class Game extends Scene {
   name = "Game";
 
   private player: Player | undefined;
   private background: ParallaxBackground | undefined;
+
+  systems: System[] = [];
+
+  enemySystem!: EnemySystem;
 
   load() {
     this.player = new Player();
@@ -35,6 +41,20 @@ export default class Game extends Scene {
     this.addChild(tilemap);
 
     helloFromBackend();
+
+    this.enemySystem = new EnemySystem(this, this.player);
+
+    const enemiesAmount = 10;
+
+    for (let i = 0; i < enemiesAmount; i++) {
+      this.enemySystem.spawnEnemy(300, 300);
+    }
+
+    this.addSystem(this.enemySystem);
+
+    Ticker.shared.add((delta) => {
+      this.updateSystems(delta);
+    });
   }
 
   onResize(width: number, height: number) {
@@ -45,6 +65,16 @@ export default class Game extends Scene {
 
     if (this.background) {
       this.background.resize(width, height);
+    }
+  }
+
+  addSystem(system: System) {
+    this.systems.push(system);
+  }
+
+  updateSystems(delta: number) {
+    for (const system of this.systems) {
+      system.update(delta);
     }
   }
 }

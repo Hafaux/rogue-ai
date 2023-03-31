@@ -25,6 +25,8 @@ export default class SceneManager {
       backgroundColor: 0x23272a,
     });
 
+    window.__PIXI_APP__ = this.app;
+
     window.addEventListener("resize", (ev: UIEvent) => {
       const target = ev.target as Window;
 
