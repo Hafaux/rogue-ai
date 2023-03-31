@@ -37,7 +37,7 @@ export default class AssetLoader {
 
     Debug.log("✅ Loaded assets group", group, resources);
 
-    this.prepareSpritesheets(resources);
+    // this.prepareSpritesheets(resources);
 
     return resources;
   }
