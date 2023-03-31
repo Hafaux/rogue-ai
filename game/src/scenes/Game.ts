@@ -2,6 +2,7 @@ import config from "../config";
 import ParallaxBackground from "../prefabs/ParallaxBackground";
 import { Player } from "../prefabs/Player";
 import Scene from "../core/Scene";
+import { CompositeTilemap } from "@pixi/tilemap";
 
 import helloFromBackend from "@rogueai/backend";
 
@@ -12,15 +13,26 @@ export default class Game extends Scene {
   private background: ParallaxBackground | undefined;
 
   load() {
-    this.background = new ParallaxBackground(config.backgrounds.forest);
     this.player = new Player();
 
     this.player.x = window.innerWidth / 2;
     this.player.y = window.innerHeight - this.player.height / 3;
 
-    this.background.initPlayerMovement(this.player);
+    const tilemap = new CompositeTilemap();
 
-    this.addChild(this.background, this.player);
+    const width = 50;
+    const height = 50;
+
+    for (let x = 0; x < width; x++) {
+      for (let y = 0; y < height; y++) {
+        const idEdge =
+          x === 0 || y === 0 || x === width - 1 || y === height - 1;
+
+        tilemap.tile(idEdge ? "brick.png" : "grass.png", x * 32, y * 32);
+      }
+    }
+
+    this.addChild(tilemap);
 
     helloFromBackend();
   }
