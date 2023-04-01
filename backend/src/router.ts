@@ -1,4 +1,6 @@
 import { initTRPC } from "@trpc/server";
+import { openAiRequest } from "./narrator/openai_controller";
+import { elevenLabsRequest, availableVoices } from './narrator/elevenlabs_controller'
 
 const t = initTRPC.create();
 
@@ -37,6 +39,19 @@ const narrations: User[] = [
     name: "get rekt",
   },
 ];
+
+export async function testOpenAiRequest() {
+  const question = 'Hello, what is your name?'
+  const answer = await openAiRequest(question);
+  console.log('Q: ' + question)
+  console.log('A: ' + answer);
+}
+
+export async function testElevenLabsRequest() {
+  const data = 'Hello, my name is Rogue, hihi'
+  const response = await elevenLabsRequest(data, availableVoices['Domi'])
+  console.log(response)
+}
 
 export const appRouter = t.router({
   getNarration: publicProcedure
