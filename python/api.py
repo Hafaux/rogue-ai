@@ -6,9 +6,9 @@ from floodFill import remove_background, resize_image
 import numpy as np
 import cv2
 
+model_id = "stabilityai/stable-diffusion-2-1-base"
 
 original_conv2d_init = None
-
 def patch_conv(cls, use_circular_padding):
     global original_conv2d_init
 
@@ -23,16 +23,17 @@ def patch_conv(cls, use_circular_padding):
     else:
         cls.__init__ = original_conv2d_init
 
-patch_conv(torch.nn.Conv2d, True)
+def create_pipeline(use_circular_padding):
+    patch_conv(torch.nn.Conv2d, use_circular_padding)
+    # Use the Euler scheduler here instead
+    scheduler = EulerDiscreteScheduler.from_pretrained(model_id, subfolder="scheduler")
+    # scheduler = DDIMScheduler.from_pretrained(model_id, subfolder="scheduler")
+    pipe = StableDiffusionPipeline.from_pretrained(model_id, scheduler=scheduler, torch_dtype=torch.float16)
+    pipe = pipe.to("cuda")
+    return pipe
 
-model_id = "stabilityai/stable-diffusion-2-1-base"
-
-pipe = StableDiffusionPipeline.from_pretrained(
-    model_id,
-    scheduler=EulerDiscreteScheduler.from_pretrained(model_id, subfolder="scheduler"),
-    torch_dtype=torch.float16
-)
-pipe = pipe.to("cuda")
+pipe_normal = create_pipeline(False)
+pipe_tiling = create_pipeline(True)
 
 from fastapi import FastAPI
 
@@ -42,10 +43,7 @@ app = FastAPI()
 async def process_data(input_data: dict):
     print("model request:", input_data)
 
-    if input_data.get("tiling", False):
-        patch_conv(torch.nn.Conv2d, True)
-    else:
-        patch_conv(torch.nn.Conv2d, False)
+    pipe = pipe_tiling if input_data.get("tiling", False) else pipe_normal
 
     generated = pipe(
       prompt=input_data.get("prompt", "Astronaut riding a horse"),
