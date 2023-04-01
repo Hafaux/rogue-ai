@@ -7,7 +7,7 @@ import { Ticker } from "pixi.js";
 import PlayerSystem from "../systems/PlayerSystem";
 import helloFromBackend from "@rogueai/backend";
 import { getPixels } from "../utils/misc";
-import { Sprite } from "pixi.js";
+import { Sprite, Texture } from "pixi.js";
 import MapGenerator from "../core/MapGenerator";
 
 export default class Game extends Scene {
@@ -56,11 +56,27 @@ export default class Game extends Scene {
 
         const color = mapBuffer.slice(i * 4, i * 4 + 4);
 
-        tilemap.tile(color[0] ? "brick.png" : "grass.png", x * 32, y * 32);
+        const brightness = (color[0] + color[1] + color[2]) / 3;
+
+        tilemap.tile(
+          brightness < 0.01 ? "brick.png" : "grass.png",
+          x * 32,
+          y * 32
+        );
       }
     }
 
     this.addChild(tilemap);
+
+    const minimap = Sprite.from(
+      Texture.fromBuffer(mapBuffer, mapGen.width, mapGen.height)
+    );
+
+    minimap.scale.set(4);
+
+    this.addChild(minimap);
+
+    helloFromBackend();
   }
 
   spawnEnemies() {
