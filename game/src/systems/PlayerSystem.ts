@@ -78,16 +78,16 @@ export default class PlayerSystem implements System {
     this.player.x += xMovement * delta;
     this.player.y += yMovement * delta;
 
-    if (this.player.x < 0) {
-      this.player.x = 0;
-    } else if (this.player.x > window.innerWidth) {
-      this.player.x = window.innerWidth;
-    }
+    // if (this.player.x < 0) {
+    //   this.player.x = 0;
+    // } else if (this.player.x > window.innerWidth) {
+    //   this.player.x = window.innerWidth;
+    // }
 
-    if (this.player.y < 0) {
-      this.player.y = 0;
-    } else if (this.player.y > window.innerHeight) {
-      this.player.y = window.innerHeight;
-    }
+    // if (this.player.y < 0) {
+    //   this.player.y = 0;
+    // } else if (this.player.y > window.innerHeight) {
+    //   this.player.y = window.innerHeight;
+    // }
   }
 }

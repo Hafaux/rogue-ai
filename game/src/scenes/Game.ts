@@ -3,11 +3,12 @@ import Scene from "../core/Scene";
 import { CompositeTilemap } from "@pixi/tilemap";
 
 import EnemySystem from "../systems/EnemySystem";
-import { Ticker } from "pixi.js";
+import { Container, Ticker } from "pixi.js";
 import PlayerSystem from "../systems/PlayerSystem";
 import { Sprite, Texture } from "pixi.js";
 import MapGenerator from "../core/MapGenerator";
 import ProjectileSystem from "../systems/ProjectileSystem";
+import StatElement from "../ui/StatElement";
 
 // import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 
@@ -31,10 +32,16 @@ export default class Game extends Scene {
   enemySystem!: EnemySystem;
   playerSystem!: PlayerSystem;
 
+  uiContainer!: Container;
+
   async load() {
     // console.warn(await trpc.getNarration.query("1"));
 
     this.player = new Player();
+
+    this.uiContainer = new Container();
+
+    this.utils.viewport.parent.addChild(this.uiContainer);
 
     this.utils.viewport.follow(this.player);
 
@@ -43,15 +50,28 @@ export default class Game extends Scene {
 
     this.addBackground();
 
+    this.initUi();
+
     this.initSystems();
 
     this.addChild(this.player);
 
     this.spawnEnemies();
+  }
 
-    Ticker.shared.add((delta) => {
-      this.updateSystems(delta);
+  initUi() {
+    const hp = new StatElement("HP", 100, {
+      alpha: 0.7,
     });
+
+    const xp = new StatElement("XP", 0, {
+      alpha: 0.7,
+      valueColor: 0x8888ff,
+    });
+
+    xp.y = hp.height;
+
+    this.uiContainer.addChild(hp, xp);
   }
 
   initSystems() {
@@ -64,6 +84,10 @@ export default class Game extends Scene {
     this.addSystem(
       new ProjectileSystem(this.enemySystem.enemies, this.player, this)
     );
+
+    Ticker.shared.add((delta) => {
+      this.updateSystems(delta);
+    });
   }
 
   addBackground() {
@@ -97,7 +121,9 @@ export default class Game extends Scene {
 
     minimap.scale.set(4);
 
-    this.utils.viewport.parent.addChild(minimap);
+    minimap.x = this.utils.viewport.screenWidth - minimap.width;
+
+    this.uiContainer.addChild(minimap);
   }
 
   spawnEnemies() {

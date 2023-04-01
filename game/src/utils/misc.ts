@@ -38,3 +38,25 @@ export function getPixels(renderer: IRenderer, image: string) {
     sprite.texture.height,
   ];
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Obj = Record<string, any>;
+
+export function deepMerge<T extends Obj, U extends Obj>(
+  target: T,
+  source: U
+): T & U {
+  const output: Obj = { ...target };
+  Object.keys(source).forEach((key) => {
+    if (
+      output[key] &&
+      typeof output[key] === "object" &&
+      typeof source[key] === "object"
+    ) {
+      output[key] = deepMerge(output[key], source[key]);
+    } else {
+      output[key] = source[key];
+    }
+  });
+  return output as T & U;
+}
