@@ -152,7 +152,6 @@ export default class Game extends Scene {
     const tilemap = new CompositeTilemap();
 
     const mapGen = new MapGenerator(this.utils.renderer, 32, 32, "dungeonGen");
-
     const mapBuffer = mapGen.generate(1000);
 
     for (let y = 0; y < mapGen.height; y++) {
@@ -164,12 +163,16 @@ export default class Game extends Scene {
         const brightness = (color[0] + color[1] + color[2]) / 3;
 
         tilemap.tile(
-          brightness < 0.01 ? "brick.png" : "grass.png",
+          brightness < 0.01 ? "grass.png" : "brick.png",
           x * 32,
           y * 32
         );
       }
     }
+
+    tilemap.scale.set(10);
+
+    console.warn(tilemap);
 
     this.addChild(tilemap);
 
