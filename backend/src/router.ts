@@ -1,6 +1,7 @@
 import { initTRPC } from "@trpc/server";
 import { openAiRequest } from "./narrator/openai_controller";
 import { elevenLabsRequest, availableVoices } from './narrator/elevenlabs_controller'
+import z from "zod"
 
 const t = initTRPC.create();
 
@@ -21,24 +22,62 @@ const t = initTRPC.create();
 // chatgpt completes with "you got hit again!"
 // -> [{id: 4, answer: "you got hit again!"}, ...]
 
-// interface Narration {
-//   text: string;
-//   audio: unknown;
-// }
-
 const publicProcedure = t.procedure;
 
-interface User {
+interface Narration {
   id: string;
-  name: string;
+  response: string;
+  audio: unknown;
+
+  // TODO: The event is fixed among a couple of different actions that may happen
+  //       such as 'player gets hit', 'player is silly', 'player performs well'.
+  event: string;
 }
 
-const narrations: User[] = [
-  {
-    id: "1",
-    name: "get rekt",
-  },
-];
+const narrationBatchSize: number = 2;
+
+class Player {
+  private id: string;
+  private theme: string;
+  private usedNarrations: Narration[] = [];
+  private feed: Narration[] = [];
+
+  constructor(id: string, theme: string) {
+    this.id = id;
+    this.theme = theme;
+  }
+
+  batch(): Narration[] {
+    if (this.feed.length < narrationBatchSize) {
+      this.prefillFeed();
+    }
+
+    const narrationBatch = this.feed.splice(0, narrationBatchSize);
+    return narrationBatch;
+  }
+
+  storeNarration(narration: Narration): void {
+    this.usedNarrations.push(narration);
+  }
+
+  getId(): string {
+    return this.id;
+  }
+
+  private prefillFeed(): void {
+    // TODO: Use OpenAI and 11Labs to acquire new feed.
+    //       Prompt GPT with the history of the conversation.
+    const history = this.history();
+  }
+
+  private history(): string {
+    // TODO: Implement in order to call from prefillFeed()
+    return "";
+  }
+}
+
+// FIXME: Unglobal this.
+let activePlayers: Player[];
 
 export async function testOpenAiRequest() {
   const question = 'Hello, what is your name?'
@@ -54,17 +93,64 @@ export async function testElevenLabsRequest() {
 }
 
 export const appRouter = t.router({
-  getNarration: publicProcedure
-    .input((val: unknown) => {
-      if (typeof val === "string") return val;
-      throw new Error(`Invalid input: ${typeof val}`);
-    })
+  // Mark player is begin active.
+  activatePlayer: publicProcedure
+    .input(z.object({
+      playerId: z.string(),
+      theme: z.string()
+    }))
     .query((req) => {
       const input = req.input;
-      const user = narrations.find((it) => it.id === input);
-
-      return user;
+      const player = new Player(input.playerId, input.theme);
+      activePlayers.push(player);
     }),
+
+  deactivatePlayer: publicProcedure
+    .input(z.object({
+      playerId: z.string()
+    }))
+    .query((req) => {
+      const input = req.input;
+      activePlayers = activePlayers.filter(player => player.getId() !== playerId);
+    }),
+
+  // Acquire a string repr of a player by id. Useful to check whether player is initialized.
+  checkPlayer: publicProcedure
+    .input(z.object({
+      playerId: z.string(),
+    }))
+    .query((req) => {
+      const input = req.input;
+      const player = activePlayers.find((p) => p.getId() === input.playerId);
+      return JSON.stringify(player);
+    }),
+
+  // Returns a narration batch which includes _narationBatchSize_ elements of type _Narration_.
+  getNarration: publicProcedure
+    .input(z.object({
+      playerId: z.string(),
+    }))
+    .query((req) => {
+      const input = req.input;
+      const player = activePlayers.find((p) => p.getId() === input.playerId) as Player;
+      const nextBatch = player.batch();
+      return JSON.stringify(nextBatch);
+    }),
+
+  // Mark a narration as "been used".
+  storeNarration: publicProcedure
+    .input(z.object({
+      playerId: z.string(),
+      narrationSerial: z.string()
+    }))
+    .query((req) => {
+      const input = req.input;
+      const player = activePlayers.find((p) => p.getId() === input.playerId) as Player;
+      const narration = JSON.parse(input.narrationSerial) as Narration;
+      player.storeNarration(narration);
+
+      return "";
+    })
 });
 
 export type AppRouter = typeof appRouter;
