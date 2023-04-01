@@ -95,13 +95,22 @@ export default class PlayerSystem implements System {
         height: 0,
       }
     ) => {
-      return {
-        x: Math.floor(
+      let x =
+        Math.floor(
           (this.player.x + xMovement * delta + width / 2) / this.worldSize.area
-        ),
-        y: Math.floor(
+        ) % this.worldSize.tileSize;
+
+      let y =
+        Math.floor(
           (this.player.y + yMovement * delta + height / 2) / this.worldSize.area
-        ),
+        ) % this.worldSize.tileSize;
+
+      if (x < 0) x = this.worldSize.tileSize + x;
+      if (y < 0) y = this.worldSize.tileSize + y;
+
+      return {
+        x,
+        y,
       };
     };
 

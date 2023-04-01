@@ -75,7 +75,7 @@ export default class Game extends Scene {
 
     this.worldSize = {
       tileSize: 32,
-      scale: 4,
+      scale: 8,
 
       get area() {
         return this.tileSize * this.scale;
@@ -85,17 +85,16 @@ export default class Game extends Scene {
     // console.warn(await trpc.getNarration.query("1"));
     console.log(this.projectiles);
 
-    this.player = new Player();
-
     this.uiContainer = new Container();
 
     this.utils.viewport.parent.addChild(this.uiContainer);
-    this.utils.viewport.follow(this.player);
-
-    this.player.x = window.innerWidth / 2;
-    this.player.y = window.innerHeight / 2;
 
     const collisionMatrix = this.addBackground();
+
+    this.spawnPlayer(collisionMatrix);
+
+    this.utils.viewport.follow(this.player);
+
     this.availableTargets.set("Enemy", [this.player]);
     this.availableTargets.set("Player", this.enemies);
 
@@ -111,6 +110,23 @@ export default class Game extends Scene {
   addEntity(entity: Entity) {
     this.entities.push(entity);
     this.addChild(entity);
+  }
+
+  spawnPlayer(collisionMatrix: CollisionMatrix) {
+    this.player = new Player();
+
+    const tiles = collisionMatrix.length;
+
+    const y = Math.floor(tiles / 2);
+
+    for (let x = tiles / 2; x < tiles; x++) {
+      const insideWall = collisionMatrix[y][x];
+
+      if (!insideWall) {
+        this.player.x = x * this.worldSize.area + this.worldSize.area / 2;
+        this.player.y = y * this.worldSize.area + this.worldSize.area / 2;
+      }
+    }
   }
 
   spawnEnemy(x = 0, y = 0) {
@@ -182,8 +198,6 @@ export default class Game extends Scene {
   }
 
   addBackground() {
-    const tilemap = new CompositeTilemap();
-
     const mapGen = new MapGenerator(
       this.utils.renderer,
       this.worldSize.tileSize,
@@ -194,35 +208,47 @@ export default class Game extends Scene {
 
     const collisionMatrix: CollisionMatrix = [];
 
-    console.warn(mapGen);
+    const generateMap = (firstMap: boolean) => {
+      const tilemap = new CompositeTilemap();
 
-    for (let y = 0; y < mapGen.height; y++) {
-      collisionMatrix.push([]);
+      for (let y = 0; y < mapGen.height; y++) {
+        if (firstMap) collisionMatrix.push([]);
 
-      for (let x = 0; x < mapGen.width; x++) {
-        const i = x + y * mapGen.height;
+        for (let x = 0; x < mapGen.width; x++) {
+          const i = x + y * mapGen.height;
 
-        const color = mapBuffer.slice(i * 4, i * 4 + 4);
+          const color = mapBuffer.slice(i * 4, i * 4 + 4);
 
-        const brightness = (color[0] + color[1] + color[2]) / 3;
+          const brightness = (color[0] + color[1] + color[2]) / 3;
 
-        collisionMatrix[y][x] = brightness < 0.01 ? 1 : 0;
+          if (firstMap) collisionMatrix[y][x] = brightness < 0.01 ? 1 : 0;
 
-        tilemap.tile(
-          brightness < 0.01 ? "brick.png" : "grass.png",
-          x * this.worldSize.tileSize,
-          y * this.worldSize.tileSize
-        );
+          tilemap.tile(
+            brightness < 0.01 ? "brick.png" : "grass.png",
+            x * this.worldSize.tileSize,
+            y * this.worldSize.tileSize
+          );
+        }
       }
+
+      return tilemap;
+    };
+
+    for (let mapIndex = 0; mapIndex < 9; mapIndex++) {
+      const firstMap = mapIndex === 0;
+
+      const mapX = (mapIndex % 3) - 1;
+      const mapY = Math.floor(mapIndex / 3) - 1;
+
+      const tilemap = generateMap(firstMap);
+
+      tilemap.x = mapX * tilemap.width * this.worldSize.scale;
+      tilemap.y = mapY * tilemap.height * this.worldSize.scale;
+
+      tilemap.scale.set(this.worldSize.scale);
+
+      this.addChild(tilemap);
     }
-
-    console.warn(collisionMatrix);
-
-    tilemap.scale.set(this.worldSize.scale);
-
-    console.warn(tilemap);
-
-    this.addChild(tilemap);
 
     const minimap = Sprite.from(
       Texture.fromBuffer(mapBuffer, mapGen.width, mapGen.height)
