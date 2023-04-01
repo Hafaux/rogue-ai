@@ -9,26 +9,6 @@ export default class Player extends Entity {
     y: number;
   };
 
-  tileCoords: {
-    current: {
-      x: number;
-      y: number;
-    };
-    previous: {
-      x: number;
-      y: number;
-    };
-  } = {
-    current: {
-      x: 0,
-      y: 0,
-    },
-    previous: {
-      x: 0,
-      y: 0,
-    },
-  };
-
   constructor(public hp = 100) {
     super();
     this.type = "Player";
@@ -37,6 +17,8 @@ export default class Player extends Entity {
     this.attackSpeed = 2.5;
     this.attackPower = 100;
     this.speed = 10;
+    this.size = 30;
+
     this.velocity = {
       x: 0,
       y: 0,
@@ -60,6 +42,7 @@ export default class Player extends Entity {
     const text = new Text("PLAYER", {
       fontSize: 20,
     });
+
     text.x = -40;
     text.y = -20;
 

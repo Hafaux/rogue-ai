@@ -14,8 +14,6 @@ import Enemy from "../prefabs/Enemy";
 import Entity from "../prefabs/Entity";
 import Projectile from "../prefabs/Projectile";
 
-import { AStarFinder } from "astar-typescript";
-
 // import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 
 // import type { AppRouter } from "../../../backend/src/router";
@@ -39,12 +37,13 @@ export default class Game extends Scene {
   uiContainer!: Container;
   enemySystem!: EnemySystem;
   playerSystem!: PlayerSystem;
+  worldSize!: { tileSize: number; scale: number; readonly area: number };
 
   async testTsEndpoints() {
-    await trpc.activatePlayer.query({
-      playerId: "0",
-      theme: "space dystopia",
-    });
+    // await trpc.activatePlayer.query({
+    //   playerId: "0",
+    //   theme: "space dystopia",
+    // });
 
     // await trpc.checkPlayer.query({
     //   playerId: "0",
@@ -58,9 +57,9 @@ export default class Game extends Scene {
     //   playerId: "0",
     // });
 
-    await trpc.getNarration.query({
-      playerId: "0",
-    });
+    // await trpc.getNarration.query({
+    //   playerId: "0",
+    // });
 
     // await trpc.storeNarration.query({
     //   playerId: "0",
@@ -71,6 +70,15 @@ export default class Game extends Scene {
 
   async load() {
     this.testTsEndpoints();
+
+    this.worldSize = {
+      tileSize: 32,
+      scale: 4,
+
+      get area() {
+        return this.tileSize * this.scale;
+      },
+    };
 
     // console.warn(await trpc.getNarration.query("1"));
     console.log(this.projectiles);
@@ -85,19 +93,6 @@ export default class Game extends Scene {
     this.player.y = window.innerHeight / 2;
 
     const collisionMatrix = this.addBackground();
-
-    const aStar = new AStarFinder({
-      grid: {
-        matrix: collisionMatrix,
-      },
-    });
-
-    const start = { x: 0, y: 0 };
-    const end = { x: 4, y: 2 };
-
-    const path = aStar.findPath(start, end);
-
-    console.log(path);
 
     this.initUi();
 
@@ -139,17 +134,29 @@ export default class Game extends Scene {
     });
 
     xp.y = hp.height;
+
     this.player.on("CHANGE_HP" as any, (newHp: number) => {
       hp.update(newHp);
     });
+
     this.uiContainer.addChild(hp, xp);
   }
 
-  initSystems(collisionMatrix: Array<number>[]) {
-    this.enemySystem = new EnemySystem(this.enemies, this.player);
+  initSystems(collisionMatrix: CollisionMatrix) {
+    this.enemySystem = new EnemySystem(
+      this.enemies,
+      this.player,
+      collisionMatrix,
+      this.worldSize
+    );
     this.addSystem(this.enemySystem);
 
-    this.playerSystem = new PlayerSystem(this.player, collisionMatrix);
+    this.playerSystem = new PlayerSystem(
+      this.player,
+      collisionMatrix,
+      this.worldSize
+    );
+
     this.addSystem(this.playerSystem);
 
     this.addSystem(
@@ -165,10 +172,15 @@ export default class Game extends Scene {
   addBackground() {
     const tilemap = new CompositeTilemap();
 
-    const mapGen = new MapGenerator(this.utils.renderer, 32, 32, "dungeonGen");
+    const mapGen = new MapGenerator(
+      this.utils.renderer,
+      this.worldSize.tileSize,
+      this.worldSize.tileSize,
+      "dungeonGen"
+    );
     const mapBuffer = mapGen.generate(1000);
 
-    const collisionMatrix: Array<number>[] = [];
+    const collisionMatrix: CollisionMatrix = [];
 
     console.warn(mapGen);
 
@@ -186,15 +198,15 @@ export default class Game extends Scene {
 
         tilemap.tile(
           brightness < 0.01 ? "brick.png" : "grass.png",
-          x * 32,
-          y * 32
+          x * this.worldSize.tileSize,
+          y * this.worldSize.tileSize
         );
       }
     }
 
     console.warn(collisionMatrix);
 
-    tilemap.scale.set(10);
+    tilemap.scale.set(this.worldSize.scale);
 
     console.warn(tilemap);
 
@@ -214,7 +226,7 @@ export default class Game extends Scene {
   }
 
   spawnEnemies() {
-    const enemiesAmount = 10;
+    const enemiesAmount = 1;
 
     for (let i = 0; i < enemiesAmount; i++) {
       this.spawnEnemy(Math.random() * 700 + 100, Math.random() * 700 + 100);

@@ -12,7 +12,7 @@ export default class Entity extends Container {
   critChance = 1;
   critMultiplier = 1;
 
-  pathToTarget: [number, number][] = [];
+  pathToTarget: number[][] = [];
 
   iframes = 1; // seconds
   iframeActive = false;
@@ -26,6 +26,26 @@ export default class Entity extends Container {
   size = 50;
   canAttack = false;
   // types
+
+  tileCoords: {
+    current: {
+      x: number;
+      y: number;
+    };
+    previous: {
+      x: number;
+      y: number;
+    };
+  } = {
+    current: {
+      x: 0,
+      y: 0,
+    },
+    previous: {
+      x: 0,
+      y: 0,
+    },
+  };
 
   constructor() {
     super();
