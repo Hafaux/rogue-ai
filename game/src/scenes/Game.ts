@@ -13,6 +13,7 @@ import StatElement from "../ui/StatElement";
 import Enemy from "../prefabs/Enemy";
 import Entity from "../prefabs/Entity";
 import Projectile from "../prefabs/Projectile";
+import { getClosestTarget, removeIfDestroyed } from "../utils/game";
 
 // import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 
@@ -33,6 +34,7 @@ export default class Game extends Scene {
   private enemies: Enemy[] = [];
   private entities: Entity[] = [];
   private projectiles: Projectile[] = [];
+  private availableTargets: Map<string, Entity[]> = new Map<string, Entity[]>();
   systems: System[] = [];
   uiContainer!: Container;
   enemySystem!: EnemySystem;
@@ -82,6 +84,7 @@ export default class Game extends Scene {
 
     // console.warn(await trpc.getNarration.query("1"));
     console.log(this.projectiles);
+
     this.player = new Player();
 
     this.uiContainer = new Container();
@@ -93,6 +96,8 @@ export default class Game extends Scene {
     this.player.y = window.innerHeight / 2;
 
     const collisionMatrix = this.addBackground();
+    this.availableTargets.set("Enemy", [this.player]);
+    this.availableTargets.set("Player", this.enemies);
 
     this.initUi();
 
@@ -128,17 +133,20 @@ export default class Game extends Scene {
       alpha: 0.7,
     });
 
+    this.player.on("CHANGE_HP" as any, (newHp: number) => {
+      hp.update(newHp);
+    });
+
     const xp = new StatElement("XP", 0, {
       alpha: 0.7,
       valueColor: 0x8888ff,
     });
 
-    xp.y = hp.height;
-
-    this.player.on("CHANGE_HP" as any, (newHp: number) => {
-      hp.update(newHp);
+    this.player.on("CHANGE_XP" as any, (newXp: number) => {
+      xp.update(newXp);
     });
 
+    xp.y = hp.height;
     this.uiContainer.addChild(hp, xp);
   }
 
@@ -160,9 +168,13 @@ export default class Game extends Scene {
     this.addSystem(this.playerSystem);
 
     this.addSystem(
-      new EntityAttackSystem(this.entities, this.spawnProjectile.bind(this))
+      new EntityAttackSystem(
+        this.entities,
+        this.spawnProjectile.bind(this),
+        this.availableTargets
+      )
     );
-    //this.addSystem(new ProjectileMoveSystem(this.projectiles));
+    this.addSystem(new ProjectileMoveSystem(this.projectiles));
 
     Ticker.shared.add((delta) => {
       this.updateSystems(delta);
@@ -246,7 +258,19 @@ export default class Game extends Scene {
 
   updateSystems(delta: number) {
     //clean up
-
+    removeIfDestroyed(this.entities);
+    removeIfDestroyed(this.enemies);
+    removeIfDestroyed(this.projectiles);
+    for (const projectile of this.projectiles) {
+      const availableTargets = this.availableTargets.get(
+        projectile.creatorStats.type
+      );
+      if (!availableTargets) continue;
+      const newClosest = getClosestTarget(projectile, availableTargets);
+      if (newClosest) {
+        projectile.target = newClosest;
+      }
+    }
     for (const system of this.systems) {
       system.update(delta);
     }

@@ -1,10 +1,14 @@
 import { Container } from "pixi.js";
-import { getEntityDirection } from "../utils/game";
+import { getClosestTarget, getEntityDirection } from "../utils/game";
 import Projectile from "./Projectile";
 
 export default class Entity extends Container {
   type = "";
   target?: Entity;
+
+  killReward = 1;
+  xp = 0;
+  level = 1;
 
   attackSpeed = 100;
   lastAttackTime = Number.MIN_SAFE_INTEGER;
@@ -56,34 +60,40 @@ export default class Entity extends Container {
 
   constructor() {
     super();
-    this.on("CHANGE_HP" as any, (newHp) => {
-      if (newHp <= 0) {
-        this.destroy();
-      }
-    });
   }
 
   applyDamage(damage: number) {
     if (!this.iframeActive) {
       this.hp -= damage;
       this.emit("CHANGE_HP" as any, this.hp);
+      if (this.hp <= 0) {
+        this.destroy();
+        return { killed: true, killReward: this.killReward };
+      }
       this.iframeActive = true;
       setTimeout(() => {
         this.iframeActive = false;
       }, this.iframes * 1000);
     }
+    return { killed: false, killReward: 0 };
   }
 
-  getProjectile(entities: Entity[]) {
+  getProjectile(availableTargets: Entity[]) {
     if (!this.canAttack) return;
-    const target = this.target || entities.find((entity) => entity != this);
+    const target = getClosestTarget(this, availableTargets);
     if (!target) {
       return;
     }
     const { vec, angle } = getEntityDirection(target, this);
 
-    const projectile = new Projectile(this.x, this.y, target, vec); // we do this in the entity
+    const projectile = new Projectile(this.x, this.y, target, this, vec); // we do this in the entity
     projectile.angle = angle;
     return projectile;
+  }
+  increaseXp(xpAmountIncrease: number) {
+    this.xp += xpAmountIncrease;
+    this.emit("CHANGE_XP" as any, this.xp);
+
+    // level up
   }
 }
