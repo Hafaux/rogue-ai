@@ -2,7 +2,7 @@ import StableDiffusion, { StableResponse } from "../api/stable_diffusion";
 import SettingGenerator, { SettingResponse } from "./setting_generator";
 import TexturePacker from "./texture_packer";
 
-export default class AssetGeneratpor {
+export default class AssetGenerator {
   settingGenerator: SettingGenerator;
   texturePacker: TexturePacker;
 
@@ -90,6 +90,6 @@ export default class AssetGeneratpor {
 
     await Promise.all(promises);
 
-    this.texturePacker.pack(false);
+    return await this.texturePacker.pack();
   }
 }
