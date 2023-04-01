@@ -1,9 +1,10 @@
-import { Player } from "../prefabs/Player";
+import Player from "../prefabs/Player";
 import Scene from "../core/Scene";
 import { CompositeTilemap } from "@pixi/tilemap";
 
 import EnemySystem from "../systems/EnemySystem";
 import { Ticker } from "pixi.js";
+import PlayerSystem from "../systems/PlayerSystem";
 
 export default class Game extends Scene {
   name = "Game";
@@ -13,18 +14,25 @@ export default class Game extends Scene {
   systems: System[] = [];
 
   enemySystem!: EnemySystem;
+  playerSystem!: PlayerSystem;
 
   load() {
     this.player = new Player();
 
     this.player.x = window.innerWidth / 2;
-    this.player.y = window.innerHeight - this.player.height / 3;
+    this.player.y = window.innerHeight / 2;
 
     this.addBackground();
 
     this.enemySystem = new EnemySystem(this, this.player);
-
     this.addSystem(this.enemySystem);
+
+    this.playerSystem = new PlayerSystem(this.player);
+    this.addSystem(this.playerSystem);
+
+    this.addChild(this.player);
+
+    this.spawnEnemies();
 
     Ticker.shared.add((delta) => {
       this.updateSystems(delta);

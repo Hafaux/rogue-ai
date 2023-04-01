@@ -32,8 +32,6 @@ export default class SceneManager {
 
       this.currentScene?.onResize?.(target.innerWidth, target.innerHeight);
     });
-
-    (window as any).__PIXI_APP__ = this.app;
   }
 
   importScenes() {
