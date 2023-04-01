@@ -37,12 +37,12 @@ async def process_data(input_data: dict):
         id = uuid.uuid4()
         name = f'{date}-{id}'
         img = np.array(img)
-        img.save(f"/home/martin/images/{name}-orig.png")
+        cv2.imwrite(f"/home/martin/images/{name}-orig.png", img)
         img = remove_background(np.array(img))
         if input_data.get("remove_background", True):
-            img.save(f"/home/martin/images/{name}-removed-bg.png")
+            cv2.imwrite(f"/home/martin/images/{name}-removed-bg.png", img)
             img = resize_image(np.array(img), 32)
-        img.save(f"/home/martin/images/{name}.png")
+        cv2.imwrite(f"/home/martin/images/{name}.png", img)
         names.append(name)
 
     return { "filenames": names }
