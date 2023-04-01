@@ -23,7 +23,8 @@
     "cors": "^2.8.5",
     "glob": "^8.0.3",
     "sharp": "^0.32.0",
-    "sharpsheet": "^0.0.8"
+    "sharpsheet": "^0.0.8",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@types/cors": "^2.8.13",
