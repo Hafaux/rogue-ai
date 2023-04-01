@@ -1,10 +1,12 @@
-import { Application, IRenderer } from "pixi.js";
+import { Application, IRenderer, settings, SCALE_MODES } from "pixi.js";
 import Scene from "./Scene";
 import { Debug } from "../utils/debug";
 import AssetLoader from "./AssetLoader";
 import { Viewport } from "pixi-viewport";
 
 if (import.meta.env.DEV) Debug.init();
+
+settings.SCALE_MODE = SCALE_MODES.NEAREST;
 
 export interface SceneUtils {
   assetLoader: AssetLoader;

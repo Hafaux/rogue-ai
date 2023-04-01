@@ -12,5 +12,6 @@
       "quotes": [2, "double"],
       "indent": ["off", 2, { "SwitchCase": 1 }],
       "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/ban-ts-comment": "off",
     },
 }
