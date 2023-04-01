@@ -20,9 +20,10 @@
   },
   "dependencies": {
     "@pixi/sound": "^5.0.0",
-    "@rogueai/backend": "^1.0.0",
     "@pixi/tilemap": "^4.0.0",
+    "@rogueai/backend": "^1.0.0",
     "gsap": "^3.11.4",
-    "pixi.js": "^7.1.1"
+    "pixi.js": "^7.1.1",
+    "wavefunctioncollapse": "^2.1.0"
   }
 }

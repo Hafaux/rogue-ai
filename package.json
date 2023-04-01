@@ -22,7 +22,6 @@
   },
   "homepage": "https://github.com/Team-9-HACKAUBG/RogueAI#readme",
   "devDependencies": {
-    "dotenv": "^16.0.3",
-    "wavefunctioncollapse": "^2.1.0"
+    "dotenv": "^16.0.3"
   }
 }
