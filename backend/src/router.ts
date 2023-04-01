@@ -25,6 +25,7 @@ export const appRouter = t.router({
         'narrator': new Narrator(),
       };
       activePlayers.push(player);
+      console.info(`Activating player ${player}`);
     }),
 
   deactivatePlayer: publicProcedure
@@ -34,6 +35,7 @@ export const appRouter = t.router({
     .query((req) => {
       const input = req.input;
       activePlayers = activePlayers.filter(player => player.id !== input.playerId);
+      console.info(`Deactivating player with id=${input.playerId}`);
     }),
 
   // Acquire a string repr of a player by id. Useful to check whether player is initialized.
@@ -44,6 +46,7 @@ export const appRouter = t.router({
     .query((req) => {
       const input = req.input;
       const player = activePlayers.find((p) => p.id === input.playerId);
+      console.info(`Checking player ${player}`);
       return JSON.stringify(player);
     }),
 
@@ -56,6 +59,7 @@ export const appRouter = t.router({
       const input = req.input;
       const player = activePlayers.find((p) => p.id === input.playerId) as Player;
       const nextBatch = player.narrator.nextBatch();
+      console.info(`Player ${player.id} gets new narration batch: '${nextBatch}'`);
       return JSON.stringify(nextBatch);
     }),
 
@@ -70,6 +74,7 @@ export const appRouter = t.router({
       const player = activePlayers.find((p) => p.id === input.playerId) as Player;
       const narration = JSON.parse(input.narrationSerial) as Narration;
       player.narrator.useNarration(narration);
+      console.info(`Player ${player.id} uses narration '${narration}'`);
     })
 });
 
