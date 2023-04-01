@@ -47,7 +47,7 @@ export default class Projectile extends Container {
     this.addChild(this.sprite);
   }
 
-  checkHit() {
+  checkHit(hitTarget: Entity) {
     // check evasion
     return true;
   }

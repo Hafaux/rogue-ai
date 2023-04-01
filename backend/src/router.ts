@@ -103,6 +103,7 @@ export const appRouter = t.router({
         (p) => p.id === input.playerId
       ) as Player;
       const narration = JSON.parse(input.narrationSerial) as Narration;
+      //""
       player.narrator.useNarration(narration);
       console.log(`Player ${player.id} uses narration '${narration}'`);
     }),

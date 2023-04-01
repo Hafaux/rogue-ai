@@ -29,14 +29,15 @@ export interface Narration {
   audio: unknown;
   event: string;
 }
-
 export class Narrator {
   private static narratorName = "You";
 
   private static narrationMarkers = [
-    "player performs well",
+    "player performs well", // "hit" ->  plyaer, "enemy" => The player got hit by and enemy
     "player performs poorly",
   ];
+
+  public static eventTransforms: Map<string, (a: string, b: string) => string>;
 
   private static narrationPromptBegin = `
 You are an enemy in a rogue-like game.\n`;
@@ -124,3 +125,15 @@ such as 'player performs well': [...], 'player performs poorly': [...].\n`;
     }
   }
 }
+
+Narrator.eventTransforms = new Map<
+  string,
+  (who: string, from: string) => string
+>();
+
+Narrator.eventTransforms.set("hit", (a: string, b: string) => {
+  return `The ${a} got hit by the ${b}`;
+});
+Narrator.eventTransforms.set("dodge", (a: string, b: string) => {
+  return `the ${a} dodged an attack by the ${b}`;
+});
