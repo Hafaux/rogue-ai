@@ -68,7 +68,10 @@ export default class AssetGeneratpor {
       const prompt = this.flatPrompt(asset, description);
 
       promises.push(
-        this.stableDiffusion.saveImage(prompt, `./assets/input/${asset}.png`)
+        this.stableDiffusion.saveImage(
+          { ...prompt, tiling: true, remove_background: false },
+          `./assets/input/${asset}.png`
+        )
       );
     }
 
@@ -78,7 +81,10 @@ export default class AssetGeneratpor {
       const prompt = this.isometricPrompt(asset, description);
 
       promises.push(
-        this.stableDiffusion.saveImage(prompt, `./assets/input/${asset}.png`)
+        this.stableDiffusion.saveImage(
+          { ...prompt, tiling: false, remove_background: true },
+          `./assets/input/${asset}.png`
+        )
       );
     }
 
