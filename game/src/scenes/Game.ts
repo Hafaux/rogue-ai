@@ -28,15 +28,37 @@ export default class Game extends Scene {
   private player!: Player;
 
   systems: System[] = [];
-
+  uiContainer!: Container;
   enemySystem!: EnemySystem;
   playerSystem!: PlayerSystem;
 
   async testTsEndpoints() {
-    console.warn(await trpc.activatePlayer.query({
-      "playerId": "0",
-      "theme": "space dystopia"
-    }));
+    await trpc.activatePlayer.query({
+      playerId: "0",
+      theme: "space dystopia",
+    });
+
+    // await trpc.checkPlayer.query({
+    //   playerId: "0",
+    // });
+
+    // await trpc.deactivatePlayer.query({
+    //   playerId: "0",
+    // });
+
+    // await trpc.checkPlayer.query({
+    //   playerId: "0",
+    // });
+
+    await trpc.getNarration.query({
+      playerId: "0",
+    });
+
+    // await trpc.storeNarration.query({
+    //   playerId: "0",
+    //   narrationSerial: "boiler",
+    // });
+    console.log("Done");
   }
 
   async load() {

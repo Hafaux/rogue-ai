@@ -1,3 +1,4 @@
+import { assert } from "console";
 import { GptController } from "../api/gpt_controller";
 
 // Spec :D
@@ -53,10 +54,10 @@ export class Narrator {
         this.used.push(narration);
     }
 
-    nextBatch(): Narration[] {
-        if (this.feed.length <= narrationFeedSize / 2) {
-            this.prefillFeed();
-        }
+    assert(
+      this.feed.length >= narrationBatchSize,
+      "Narration feed is not big enough!"
+    );
 
         const narrationBatch = this.feed.splice(0, narrationBatchSize);
         return narrationBatch;
