@@ -16,16 +16,18 @@ export default class ProjectileMoveSystem implements System {
       return;
     }
 
-    const distance = getEntityDistance(projectile, projectile.target);
+    if (!projectile.target.destroyed) {
+      const distance = getEntityDistance(projectile, projectile.target);
 
-    //Projectile hit
-    if (distance < 20) {
-      // entity hit function
-      console.warn("HIT ENEMY", projectile.target);
-      if (projectile.checkHit()) {
-        projectile.onHit(projectile.target);
-        projectile.destroy();
-        return;
+      //Projectile hit
+      if (distance < 20) {
+        // entity hit function
+        console.warn("HIT ENEMY", projectile.target);
+        if (projectile.checkHit()) {
+          projectile.onHit(projectile.target);
+          projectile.destroy();
+          return;
+        }
       }
     }
 
