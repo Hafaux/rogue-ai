@@ -2,102 +2,107 @@ import { Container, Ticker } from "pixi.js";
 import Enemy from "../prefabs/Enemy";
 import Player from "../prefabs/Player";
 import Projectile from "../prefabs/Projectile";
-import { getEntityDirection, getEntityDistance } from "../utils/game";
+import { getEntityDistance } from "../utils/game";
+import Entity from "../prefabs/Entity";
 
 export default class ProjectileSystem implements System {
   timer = 0;
-  startTime = 0;
-  shootFrequency: number;
-  projectiles: {
-    player: Projectile[];
-    enemy: Projectile[];
-  } = {
-    player: [],
-    enemy: [],
-  };
+  projectiles: Map<Entity, Projectile[]> = new Map<Entity, Projectile[]>();
 
   constructor(
-    private enemies: Enemy[],
-    private player: Player,
+    private entities: Entity[],
     private world: Container
   ) {
-    //
-    this.shootFrequency = 1;
+    for(const entity of [...entities]) {
+      this.projectiles.set(entity, new Array());
+    }
+    //@ts-ignore
+    world.on("ENTITY_SPAWN", (entity: Entity) => {
+      this.addEntity(entity);
+    });
   }
 
-  updateEnemyProjectiles() {
-    //
+  addEntity(entity: Entity){
+    this.entities.push(entity);
+    this.projectiles.set(entity, new Array());
   }
 
-  removeProjectile(projectile: Projectile) {
-    this.projectiles.player.splice(
-      this.projectiles.player.indexOf(projectile),
-      1
-    );
+  removeProjectile(entity: Entity, projectile: Projectile) {
+    const projectileArray = this.projectiles.get(entity);
+    if (projectileArray) {
+      projectileArray.splice(
+        projectileArray.indexOf(projectile),
+        1
+      );
+    }
+
 
     projectile.destroy();
   }
 
-  updatePlayerProjectiles(delta: number) {
+  updateEntityProjectiles(delta: number, entity: Entity) {
     //
-    for (const projectile of [...this.projectiles.player]) {
-      // for (const enemy of this.enemies) {
-      // }
-      const distance = getEntityDistance(projectile, projectile.target);
+    const projectileArray = this.projectiles.get(entity);
 
-      // Projectile hit
-      if (distance < 20) {
-        console.warn("HIT ENEMY", projectile.target);
-
-        this.removeProjectile(projectile);
-
-        continue;
+    if(projectileArray){
+      for (const projectile of [...projectileArray]) {
+        // for (const enemy of this.enemies) {
+        // }
+        const projectileTarget = projectile.target //|| min() 
+        const distance = getEntityDistance(projectile, projectileTarget);
+  
+        //Projectile hit
+        if (distance < 20) {
+          // entity hit function
+          console.warn("HIT ENEMY", projectile.target);
+          if(entity.projectileHit(projectileTarget)){
+            entity.projectileOnHit(projectileTarget)
+            this.removeProjectile(entity, projectile);
+            continue;
+          }
+        }
+  
+        // projectile dead
+        if (projectile.life > entity.projectileLifespan) {
+          console.warn("PROJECTILE DEAD");
+  
+          this.removeProjectile(entity, projectile);
+  
+          continue;
+        }
+  
+        projectile.life += Ticker.shared.elapsedMS / 1000;
+  
+        projectile.x -= projectile.direction.x * projectile.speed * delta;
+        projectile.y -= projectile.direction.y * projectile.speed * delta;
       }
-
-      // projectile dead
-      if (projectile.life > 2.5) {
-        console.warn("PROJECTILE DEAD");
-
-        this.removeProjectile(projectile);
-
-        continue;
-      }
-
-      projectile.life += Ticker.shared.elapsedMS / 1000;
-
-      projectile.x -= projectile.direction.x * projectile.speed * delta;
-      projectile.y -= projectile.direction.y * projectile.speed * delta;
     }
   }
 
-  spawnPlayerProjectiles() {
-    const closestEnemy = this.enemies[0];
+  spawnProjectile(projectile: Projectile, entityOwner: Entity) {
 
-    const { vec, angle } = getEntityDirection(closestEnemy, this.player);
-
-    const projectile = new Projectile(
-      this.player.x,
-      this.player.y,
-      closestEnemy,
-      vec
-    );
-
-    projectile.rotation = angle - Math.PI / 2;
+    projectile.rotation = projectile.angle - Math.PI / 2;
 
     this.world.addChild(projectile);
 
-    this.projectiles.player.push(projectile);
+    this.projectiles.get(entityOwner)?.push(projectile);
+
+    //console.warn(this.projectiles.get(entityOwner))
   }
 
   update(delta: number) {
+    this.timer += Ticker.shared.elapsedMS / 1000;
     // const elapsedSeconds = (this.startTime - Ticker.shared.elapsedMS) / 1000;
-    this.startTime += Ticker.shared.elapsedMS / 1000;
-
-    this.updatePlayerProjectiles(delta);
-
-    if (this.startTime > this.shootFrequency) {
-      this.spawnPlayerProjectiles();
-      this.startTime = 0;
+    for (const entity of [...this.entities]) {
+  
+      this.updateEntityProjectiles(delta, entity);
+      if (entity.canAttack && this.timer > entity.attackSpeed + entity.lastAttackTime) {
+        const projectile = entity.getProjectile(this.entities);
+        if(projectile) {
+          this.spawnProjectile(projectile, entity);
+        }
+        entity.lastAttackTime = this.timer;
+      }
     }
   }
 }

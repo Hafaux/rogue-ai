@@ -82,7 +82,7 @@ export default class Game extends Scene {
     this.addSystem(this.playerSystem);
 
     this.addSystem(
-      new ProjectileSystem(this.enemySystem.enemies, this.player, this)
+      new ProjectileSystem([...this.enemySystem.enemies, this.player], this)
     );
 
     Ticker.shared.add((delta) => {

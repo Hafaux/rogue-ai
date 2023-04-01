@@ -1,6 +1,8 @@
 import { Container } from "pixi.js";
+import Entity from "../prefabs/Entity";
+import Projectile from "../prefabs/Projectile";
 
-export function getEntityDirection(entity: Container, targetEntity: Container) {
+export function getEntityDirection(entity: Entity, targetEntity: Entity) {
   const x = targetEntity.x - entity.x;
   const y = targetEntity.y - entity.y;
 

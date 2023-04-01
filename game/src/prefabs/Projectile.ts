@@ -1,4 +1,5 @@
 import { Container, Graphics } from "pixi.js";
+import Entity from "./Entity";
 
 export default class Projectile extends Container {
   sprite: Graphics;
@@ -8,7 +9,7 @@ export default class Projectile extends Container {
   constructor(
     x: number,
     y: number,
-    public target: Container,
+    public target: Entity,
     public direction: Vec2D = {
       x: 0,
       y: 0,
