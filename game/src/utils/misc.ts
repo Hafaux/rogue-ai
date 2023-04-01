@@ -1,4 +1,4 @@
-import { DisplayObject, Sprite } from "pixi.js";
+import { DisplayObject, IRenderer, Sprite } from "pixi.js";
 
 export function centerObjects(...toCenter: DisplayObject[]) {
   const center = (obj: DisplayObject) => {
@@ -27,4 +27,14 @@ export async function after(
 
 export function getEntries<T extends object>(obj: T) {
   return Object.entries(obj) as Entries<T>;
+}
+
+export function getPixels(renderer: IRenderer, image: string) {
+  const sprite = Sprite.from(image);
+
+  return [
+    renderer.extract.pixels(sprite),
+    sprite.texture.width,
+    sprite.texture.height,
+  ];
 }
