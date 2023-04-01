@@ -2,19 +2,16 @@ import dotenv from "dotenv";
 import axios from 'axios';
 
 // TODO:
-// Should this be here?
+// Should this be here? Um, probably no :D.
 export const availableVoices = {
   'Rachel': '21m00Tcm4TlvDq8ikWAM',
   'Domi': 'AZnzlk1XvdvUeBnXmlld',
   'Bella': 'EXAVITQu4vr4xnSDxMaL'
 }
 
-
 const headers = {
   'accept': 'audio/mpeg',
-  'xi-api-key': 'elevenlabs-secret-key',
-  // 'xi-api-key': process.env.OPENAI_API_KEY,
-  // TODO: Replace upper line with the following when server is setup.
+  'xi-api-key': process.env.OPENAI_API_KEY,
   'Content-Type': 'application/json'
 };
 

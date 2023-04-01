@@ -1,6 +1,4 @@
 import { initTRPC } from "@trpc/server";
-import { openAiRequest } from "./narrator/openai_controller";
-import { elevenLabsRequest, availableVoices } from './narrator/elevenlabs_controller'
 import z from "zod"
 import { Player} from './player'
 import { Narrator, Narration } from "./narrator/narrator";

@@ -1,3 +1,4 @@
+import { GptController } from "../api/gpt_controller";
 
 // Spec :D
 // -------
@@ -19,9 +20,9 @@
 // -> [{id: 4, answer: "you got hit again!"}, ...]
 
 export const narrationBatchSize: number = 2;
+const narrationFeedSize: number = 10;
 
 export interface Narration {
-    id: string;
     response: string;
     audio: unknown;
 
@@ -31,6 +32,20 @@ export interface Narration {
 }
 
 export class Narrator {
+    private static narratorName = "Narrator";
+    
+    private static narrationPromptBegin = `
+        You are an enemy in a rogue-like game. Here is the progress so far.`;
+
+    private static narrationPromptEnd = `
+        Consider the following three scenarios and give suitable narration to each of them:
+        1. Player performs an action well. (Cheer him or/and compare to his previous attempts)
+        2. Performs performs an action poorly. (Taunt him) 
+        Could you provide 3 short narrations sentences for both of them?
+        Please output in JSON format but just before the meaningful part of the output write
+        "NARRATIONS_BEGIN" and just after the end of it write "NARRATIONS_END".
+        `;
+
     private used: Narration[] = [];
     private feed: Narration[] = [];
 
@@ -39,7 +54,7 @@ export class Narrator {
     }
 
     nextBatch(): Narration[] {
-        if (this.feed.length < narrationBatchSize) {
+        if (this.feed.length <= narrationFeedSize / 2) {
             this.prefillFeed();
         }
 
@@ -48,13 +63,21 @@ export class Narrator {
     }
 
     private history(): string {
-        // TODO: Implement in order to call from prefillFeed()
-        return "";
+        let history: string = "";
+        for (const u of this.used) {
+            history += `*${u.event}*\n${Narrator.narratorName}: "${u.response}"\n`
+        }
+        return history;
     }
 
     private prefillFeed(): void {
         // TODO: Use OpenAI and 11Labs to acquire new feed.
         //       Prompt GPT with the history of the conversation.
         const history = this.history();
+        const prompt = Narrator.narrationPromptBegin + history + Narrator.narrationPromptEnd;
+        const answer = GptController.request(prompt);
+        console.log("DEBUG: " + answer);
+
+        // TODO: Parse output of GPT.
     }
 }
