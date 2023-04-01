@@ -37,12 +37,13 @@ export default class Game extends Scene {
   uiContainer!: Container;
   enemySystem!: EnemySystem;
   playerSystem!: PlayerSystem;
+  worldSize!: { tileSize: number; scale: number; readonly area: number };
 
   async testTsEndpoints() {
-    await trpc.activatePlayer.query({
-      playerId: "0",
-      theme: "space dystopia",
-    });
+    // await trpc.activatePlayer.query({
+    //   playerId: "0",
+    //   theme: "space dystopia",
+    // });
 
     // await trpc.checkPlayer.query({
     //   playerId: "0",
@@ -56,9 +57,9 @@ export default class Game extends Scene {
     //   playerId: "0",
     // });
 
-    await trpc.getNarration.query({
-      playerId: "0",
-    });
+    // await trpc.getNarration.query({
+    //   playerId: "0",
+    // });
 
     // await trpc.storeNarration.query({
     //   playerId: "0",
@@ -70,6 +71,15 @@ export default class Game extends Scene {
   async load() {
     this.testTsEndpoints();
 
+    this.worldSize = {
+      tileSize: 32,
+      scale: 4,
+
+      get area() {
+        return this.tileSize * this.scale;
+      },
+    };
+
     // console.warn(await trpc.getNarration.query("1"));
     console.log(this.projectiles);
     this.player = new Player();
@@ -77,17 +87,16 @@ export default class Game extends Scene {
     this.uiContainer = new Container();
 
     this.utils.viewport.parent.addChild(this.uiContainer);
-
     this.utils.viewport.follow(this.player);
 
     this.player.x = window.innerWidth / 2;
     this.player.y = window.innerHeight / 2;
 
-    this.addBackground();
+    const collisionMatrix = this.addBackground();
 
     this.initUi();
 
-    this.initSystems();
+    this.initSystems(collisionMatrix);
 
     this.addEntity(this.player);
 
@@ -125,17 +134,29 @@ export default class Game extends Scene {
     });
 
     xp.y = hp.height;
+
     this.player.on("CHANGE_HP" as any, (newHp: number) => {
       hp.update(newHp);
     });
+
     this.uiContainer.addChild(hp, xp);
   }
 
-  initSystems() {
-    this.enemySystem = new EnemySystem(this.enemies, this.player);
+  initSystems(collisionMatrix: CollisionMatrix) {
+    this.enemySystem = new EnemySystem(
+      this.enemies,
+      this.player,
+      collisionMatrix,
+      this.worldSize
+    );
     this.addSystem(this.enemySystem);
 
-    this.playerSystem = new PlayerSystem(this.player);
+    this.playerSystem = new PlayerSystem(
+      this.player,
+      collisionMatrix,
+      this.worldSize
+    );
+
     this.addSystem(this.playerSystem);
 
     this.addSystem(
@@ -151,11 +172,21 @@ export default class Game extends Scene {
   addBackground() {
     const tilemap = new CompositeTilemap();
 
-    const mapGen = new MapGenerator(this.utils.renderer, 32, 32, "dungeonGen");
-
+    const mapGen = new MapGenerator(
+      this.utils.renderer,
+      this.worldSize.tileSize,
+      this.worldSize.tileSize,
+      "dungeonGen"
+    );
     const mapBuffer = mapGen.generate(1000);
 
+    const collisionMatrix: CollisionMatrix = [];
+
+    console.warn(mapGen);
+
     for (let y = 0; y < mapGen.height; y++) {
+      collisionMatrix.push([]);
+
       for (let x = 0; x < mapGen.width; x++) {
         const i = x + y * mapGen.height;
 
@@ -163,13 +194,21 @@ export default class Game extends Scene {
 
         const brightness = (color[0] + color[1] + color[2]) / 3;
 
+        collisionMatrix[y][x] = brightness < 0.01 ? 1 : 0;
+
         tilemap.tile(
           brightness < 0.01 ? "brick.png" : "grass.png",
-          x * 32,
-          y * 32
+          x * this.worldSize.tileSize,
+          y * this.worldSize.tileSize
         );
       }
     }
+
+    console.warn(collisionMatrix);
+
+    tilemap.scale.set(this.worldSize.scale);
+
+    console.warn(tilemap);
 
     this.addChild(tilemap);
 
@@ -182,10 +221,12 @@ export default class Game extends Scene {
     minimap.x = this.utils.viewport.screenWidth - minimap.width;
 
     this.uiContainer.addChild(minimap);
+
+    return collisionMatrix;
   }
 
   spawnEnemies() {
-    const enemiesAmount = 10;
+    const enemiesAmount = 3;
 
     for (let i = 0; i < enemiesAmount; i++) {
       this.spawnEnemy(Math.random() * 700 + 100, Math.random() * 700 + 100);

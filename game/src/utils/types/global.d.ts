@@ -18,3 +18,5 @@ type Vec2D<T = number> = {
   x: T;
   y: T;
 };
+
+type CollisionMatrix = number[][];

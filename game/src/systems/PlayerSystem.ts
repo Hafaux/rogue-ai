@@ -11,7 +11,15 @@ export default class PlayerSystem implements System {
     RIGHT: boolean;
   };
 
-  constructor(private player: Player) {
+  constructor(
+    private player: Player,
+    private collisionMatrix: Array<number>[],
+    private worldSize: {
+      tileSize: number;
+      scale: number;
+      readonly area: number;
+    }
+  ) {
     this.keyboard.onAction(({ action, buttonState }) => {
       if (buttonState === "pressed") this.onActionPress(action);
       else if (buttonState === "released") this.onActionRelease(action);
@@ -75,19 +83,56 @@ export default class PlayerSystem implements System {
       ? this.player.speed
       : 0;
 
+    const getNewCoords = (
+      {
+        width,
+        height,
+      }: {
+        width: number;
+        height: number;
+      } = {
+        width: 0,
+        height: 0,
+      }
+    ) => {
+      return {
+        x: Math.floor(
+          (this.player.x + xMovement * delta + width / 2) / this.worldSize.area
+        ),
+        y: Math.floor(
+          (this.player.y + yMovement * delta + height / 2) / this.worldSize.area
+        ),
+      };
+    };
+
+    const newCoords = getNewCoords(this.player);
+    const newCoordsRaw = getNewCoords();
+    const newCoordsMirror = getNewCoords({
+      width: -this.player.width,
+      height: -this.player.height,
+    });
+
+    if (
+      JSON.stringify(newCoordsRaw) !==
+      JSON.stringify(this.player.tileCoords.current)
+    ) {
+      this.player.tileCoords.previous = {
+        ...this.player.tileCoords.current,
+      };
+
+      this.player.tileCoords.current = newCoordsRaw;
+
+      this.player.emit("TILE_CHANGE" as any, newCoords);
+    }
+
+    const colliding = this.collisionMatrix[newCoords.y][newCoords.x];
+    const collidingMirror =
+      this.collisionMatrix[newCoordsMirror.y][newCoordsMirror.x];
+
+    if (colliding || collidingMirror) {
+      return;
+    }
     this.player.x += xMovement * delta;
     this.player.y += yMovement * delta;
-
-    // if (this.player.x < 0) {
-    //   this.player.x = 0;
-    // } else if (this.player.x > window.innerWidth) {
-    //   this.player.x = window.innerWidth;
-    // }
-
-    // if (this.player.y < 0) {
-    //   this.player.y = 0;
-    // } else if (this.player.y > window.innerHeight) {
-    //   this.player.y = window.innerHeight;
-    // }
   }
 }

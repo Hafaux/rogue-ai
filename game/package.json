@@ -23,6 +23,7 @@
     "@pixi/tilemap": "^4.0.0",
     "@trpc/client": "^10.18.0",
     "esbuild": "^0.17.14",
+    "astar-typescript": "^1.2.6",
     "gsap": "^3.11.4",
     "pixi-viewport": "^5.0.1",
     "pixi.js": "^7.1.1",
