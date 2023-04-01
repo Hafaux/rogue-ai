@@ -2,6 +2,8 @@ import torch
 from diffusers import StableDiffusionPipeline, EulerDiscreteScheduler, DDIMScheduler
 import uuid
 import datetime
+from floodFill import remove_background, resize_image
+import numpy as np
 
 model_id = "stabilityai/stable-diffusion-2-1"
 
@@ -33,7 +35,13 @@ async def process_data(input_data: dict):
         date = datetime.datetime.now().strftime("%d-%H:%M:%S.%f")
         id = uuid.uuid4()
         name = f'{date}-{id}'
+        img.save(f"/home/martin/images/{name}-orig.png")
+        img = remove_background(np.array(img))
+        img.save(f"/home/martin/images/{name}-removed-bg.png")
+        img = resize_image(np.array(img), 32)
         img.save(f"/home/martin/images/{name}.png")
         names.append(name)
 
     return { "filenames": names }
+
+

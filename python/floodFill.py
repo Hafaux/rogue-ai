@@ -1,32 +1,19 @@
 import cv2
 import numpy as np
 
-# Load the image
-img = cv2.imread("image.png")
+def remove_background(img):
+    tolerance = 32
+    seed_pt = (0, 0)
+    seed_color = img[seed_pt[1], seed_pt[0]]
+    lower_val = np.array([seed_color[0] - tolerance, seed_color[1] - tolerance, seed_color[2] - tolerance, 0])
+    upper_val = np.array([seed_color[0] + tolerance, seed_color[1] + tolerance, seed_color[2] + tolerance, 255])
+    h, w = img.shape[:2]
+    img_alpha = np.ones((h, w, 1), dtype=np.uint8) * 255
+    img_with_alpha = np.concatenate((img, img_alpha), axis=-1)
+    mask = cv2.inRange(img_with_alpha, lower_val, upper_val)
+    removed_bg = cv2.bitwise_and(img_with_alpha, img_with_alpha, mask=cv2.bitwise_not(mask))
+    return removed_bg
 
-connectivity = 4
-
-tolerance = 32
-_tolerance = (tolerance, tolerance, tolerance, )
-
-_flood_fill_flags = (
-    connectivity | cv2.FLOODFILL_FIXED_RANGE | 255 << 8
-)
-
-h, w = img.shape[:2]
-
-# Perform flood fill on the grayscale image
-mask = np.zeros((h + 2, w + 2), dtype=np.uint8)
-# mask = np.zeros_like(img, dtype=np.uint8)
-seed_pt = (5, 5)  # Seed point for the flood fill operation
-new_val = (0, 0, 255, 0)  # New color value for the flooded area
-num_filled = cv2.floodFill(img, None, seed_pt, new_val, _tolerance, _tolerance, _flood_fill_flags)
-# num_filled = cv2.floodFill(mask, None, seed_pt, new_val)
-
-result = cv2.bitwise_and(img, img, mask)
-
-# Display the original image and the filled image
-cv2.imshow("Original Image", result)
-cv2.waitKey(0)
-
-
+def resize_image(img, size):
+    img_small = cv2.resize(img, (size, size), interpolation=cv2.INTER_LINEAR)
+    return img_small
