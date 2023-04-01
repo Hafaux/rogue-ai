@@ -32,10 +32,15 @@ export default class Game extends Scene {
   enemySystem!: EnemySystem;
   playerSystem!: PlayerSystem;
 
-  uiContainer!: Container;
+  async testTsEndpoints() {
+    console.warn(await trpc.activatePlayer.query({
+      "playerId": "0",
+      "theme": "space dystopia"
+    }));
+  }
 
   async load() {
-    // console.warn(await trpc.getNarration.query("1"));
+    this.testTsEndpoints();
 
     this.player = new Player();
 
