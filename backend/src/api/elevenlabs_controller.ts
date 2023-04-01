@@ -1,18 +1,18 @@
 import dotenv from "dotenv";
-import axios from 'axios';
+import axios from "axios";
 
 // TODO:
 // Should this be here? Um, probably no :D.
 export const availableVoices = {
-  'Rachel': '21m00Tcm4TlvDq8ikWAM',
-  'Domi': 'AZnzlk1XvdvUeBnXmlld',
-  'Bella': 'EXAVITQu4vr4xnSDxMaL'
-}
+  Rachel: "21m00Tcm4TlvDq8ikWAM",
+  Domi: "AZnzlk1XvdvUeBnXmlld",
+  Bella: "EXAVITQu4vr4xnSDxMaL",
+};
 
 const headers = {
-  'accept': 'audio/mpeg',
-  'xi-api-key': process.env.OPENAI_API_KEY,
-  'Content-Type': 'application/json'
+  accept: "audio/mpeg",
+  "xi-api-key": process.env.ELEVENLABS_API_KEY,
+  "Content-Type": "application/json",
 };
 
 export const elevenLabsRequest = async (message: string, voiceId: string) => {
@@ -21,16 +21,17 @@ export const elevenLabsRequest = async (message: string, voiceId: string) => {
     text: message,
     voice_settings: {
       stability: 0,
-      similarity_boost: 0
-    }
+      similarity_boost: 0,
+    },
   };
 
-  axios.post(apiUrl, requestBody, { headers })
-    .then(response => {
+  axios
+    .post(apiUrl, requestBody, { headers })
+    .then((response) => {
       return response.data;
     })
-    .catch(error => {
+    .catch((error) => {
       console.error(error);
-      return '';
+      return "";
     });
-}
+};

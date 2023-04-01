@@ -1,7 +1,7 @@
-import { Narration, Narrator } from './narrator/narrator'
+import { Narration, Narrator } from "./narrator/narrator";
 
 export interface Player {
-    id: string;
-    theme: string;
-    narrator: Narrator;
+  id: string;
+  theme: string;
+  narrator: Narrator;
 }
