@@ -5,10 +5,14 @@ export default class Projectile extends Container {
   sprite: Graphics;
   life = 0;
   speed = 5;
-  data: {
+  creatorStats: {
     projectileLifespan: number;
+    attackPower: number;
+    type: string;
   } = {
     projectileLifespan: 0,
+    attackPower: 0,
+    type: "",
   };
   constructor(
     x: number,
@@ -27,9 +31,9 @@ export default class Projectile extends Container {
     //   ...
     // }
 
-    for (const key in this.data) {
+    for (const key in this.creatorStats) {
       // @ts-ignore
-      this.data[key] = creator[key];
+      this.creatorStats[key] = creator[key];
     }
 
     this.sprite = new Graphics();
@@ -52,6 +56,11 @@ export default class Projectile extends Container {
     // apply debufs calculate damage stuff like that
     // resists
     if (hitTarget.destroyed) return;
-    hitTarget.applyDamage(this.attackPower);
+    const { killed, killReward } = hitTarget.applyDamage(
+      this.creatorStats.attackPower
+    );
+    if (killed && !this.creator.destroyed) {
+      this.creator.increaseXp(killReward);
+    }
   }
 }

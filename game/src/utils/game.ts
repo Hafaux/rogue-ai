@@ -1,8 +1,7 @@
 import { Container } from "pixi.js";
 import Entity from "../prefabs/Entity";
-import Projectile from "../prefabs/Projectile";
 
-export function getEntityDirection(entity: Entity, targetEntity: Entity) {
+export function getEntityDirection(entity: Container, targetEntity: Container) {
   const x = targetEntity.x - entity.x;
   const y = targetEntity.y - entity.y;
 
@@ -57,4 +56,28 @@ export function getEntityDistance(entity: Container, targetEntity: Container) {
   const y = targetEntity.y - entity.y;
 
   return Math.sqrt(x * x + y * y);
+}
+
+export function removeIfDestroyed(array: Container[]) {
+  for (const value of [...array]) {
+    if (value.destroyed) {
+      array.splice(array.indexOf(value), 1);
+    }
+  }
+}
+
+export function getClosestTarget(
+  fromEntity: Container,
+  availableTargets: Entity[]
+) {
+  let minDist = Number.MAX_SAFE_INTEGER;
+  let newTarget = null;
+  for (const entity of availableTargets) {
+    const newDist = getEntityDistance(fromEntity, entity);
+    if (minDist >= newDist) {
+      minDist = newDist;
+      newTarget = entity;
+    }
+  }
+  return newTarget;
 }

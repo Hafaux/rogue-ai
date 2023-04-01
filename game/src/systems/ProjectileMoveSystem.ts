@@ -7,36 +7,26 @@ export default class ProjectileMoveSystem implements System {
 
   constructor(private projectiles: Projectile[]) {}
 
-  removeProjectile(projectile: Projectile) {
-    this.projectiles.splice(this.projectiles.indexOf(projectile), 1);
-    projectile.destroy();
-  }
+  updateProjectile(delta: number, projectile: Projectile) {
+    // projectile dead
+    if (projectile.life > projectile.creatorStats.projectileLifespan) {
+      console.warn("PROJECTILE DEAD");
 
-  updateEntityProjectile(delta: number, projectile: Projectile) {
-    //
-    // for (const enemy of this.enemies) {
-    // }
-    const projectileTarget = projectile.target; //|| min()
-    const distance = getEntityDistance(projectile, projectileTarget);
+      projectile.destroy();
+      return;
+    }
+
+    const distance = getEntityDistance(projectile, projectile.target);
 
     //Projectile hit
     if (distance < 20) {
       // entity hit function
       console.warn("HIT ENEMY", projectile.target);
       if (projectile.checkHit()) {
-        projectile.onHit(projectileTarget);
-        this.removeProjectile(projectile);
+        projectile.onHit(projectile.target);
+        projectile.destroy();
         return;
       }
-    }
-
-    // projectile dead
-    if (projectile.life > projectile.data.projectileLifespan) {
-      console.warn("PROJECTILE DEAD");
-
-      this.removeProjectile(projectile);
-
-      return;
     }
 
     projectile.life += Ticker.shared.elapsedMS / 1000;
@@ -50,7 +40,7 @@ export default class ProjectileMoveSystem implements System {
 
   update(delta: number) {
     for (const projectile of [...this.projectiles]) {
-      this.updateEntityProjectile(delta, projectile);
+      this.updateProjectile(delta, projectile);
     }
   }
 }

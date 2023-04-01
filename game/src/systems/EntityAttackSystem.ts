@@ -6,7 +6,8 @@ export default class EntityAttackSystem implements System {
   timer = 0;
   constructor(
     private entities: Entity[],
-    private registerProjectile: (projectile: Projectile) => void
+    private registerProjectile: (projectile: Projectile) => void,
+    private availableTargets: Map<string, Entity[]>
   ) {
     //
   }
@@ -19,10 +20,13 @@ export default class EntityAttackSystem implements System {
         entity.canAttack &&
         this.timer > entity.attackSpeed + entity.lastAttackTime
       ) {
-        const projectile = entity.getProjectile(this.entities);
-        if (projectile) {
-          projectile.rotation = projectile.angle - Math.PI / 2;
-          this.registerProjectile(projectile);
+        const availableTargets = this.availableTargets.get(entity.type);
+        if (availableTargets) {
+          const projectile = entity.getProjectile(availableTargets);
+          if (projectile) {
+            projectile.rotation = projectile.angle - Math.PI / 2;
+            this.registerProjectile(projectile);
+          }
         }
         entity.lastAttackTime = this.timer;
       }
