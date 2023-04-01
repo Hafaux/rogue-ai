@@ -5,6 +5,7 @@ import Projectile from "./Projectile";
 export default class Entity extends Container {
   type = "";
   target?: Entity;
+
   attackSpeed = 100;
   lastAttackTime = Number.MIN_SAFE_INTEGER;
   attackPower = 1;
@@ -12,7 +13,7 @@ export default class Entity extends Container {
   critMultiplier = 1;
 
   iframes = 1; // seconds
-  inIFrames = false;
+  iframeActive = false;
   hp = 100;
   defence = 0;
   hpRegen = 0;
@@ -26,25 +27,22 @@ export default class Entity extends Container {
 
   constructor() {
     super();
+    this.on("CHANGE_HP" as any, (newHp) => {
+      if (newHp <= 0) {
+        this.destroy();
+      }
+    });
   }
 
   applyDamage(damage: number) {
-    if (!this.inIFrames) {
+    if (!this.iframeActive) {
       this.hp -= damage;
       this.emit("CHANGE_HP" as any, this.hp);
-      this.inIFrames = true;
+      this.iframeActive = true;
       setTimeout(() => {
-        this.inIFrames = false;
+        this.iframeActive = false;
       }, this.iframes * 1000);
     }
-  }
-
-  projectileHit(other: Entity) {
-    return true;
-  }
-
-  projectileOnHit(other: Entity) {
-    return;
   }
 
   getProjectile(entities: Entity[]) {

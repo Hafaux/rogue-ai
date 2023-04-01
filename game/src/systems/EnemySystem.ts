@@ -1,26 +1,10 @@
-import { Container } from "pixi.js";
 import Enemy from "../prefabs/Enemy";
 import Player from "../prefabs/Player";
 import { getEntityDirection } from "../utils/game";
 
 export default class EnemySystem implements System {
-  enemies: Enemy[] = [];
-
-  constructor(private world: Container, private playerRef: Player) {
+  constructor(private enemies: Enemy[], private playerRef: Player) {
     //
-  }
-
-  spawnEnemy(x = 0, y = 0) {
-    const enemy = new Enemy();
-
-    enemy.x = x;
-    enemy.y = y;
-
-    this.enemies.push(enemy);
-
-    this.world.addChild(enemy);
-
-    this.world.emit("ENTITY_SPAWN" as any, enemy);
   }
 
   playerCollision(enemy: Enemy, delta: number) {
@@ -55,9 +39,8 @@ export default class EnemySystem implements System {
   }
 
   update(delta: number) {
-    for (const enemy of this.enemies) {
+    for (const enemy of [...this.enemies]) {
       this.playerCollision(enemy, delta);
-
       this.enemyCollision(enemy, delta);
     }
   }

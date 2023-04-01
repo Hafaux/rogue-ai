@@ -7,8 +7,12 @@ import { Container, Ticker } from "pixi.js";
 import PlayerSystem from "../systems/PlayerSystem";
 import { Sprite, Texture } from "pixi.js";
 import MapGenerator from "../core/MapGenerator";
-import ProjectileSystem from "../systems/ProjectileSystem";
+import ProjectileMoveSystem from "../systems/ProjectileMoveSystem";
+import EntityAttackSystem from "../systems/EntityAttackSystem";
 import StatElement from "../ui/StatElement";
+import Enemy from "../prefabs/Enemy";
+import Entity from "../prefabs/Entity";
+import Projectile from "../prefabs/Projectile";
 
 // import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 
@@ -26,7 +30,9 @@ export default class Game extends Scene {
   name = "Game";
 
   private player!: Player;
-
+  private enemies: Enemy[] = [];
+  private entities: Entity[] = [];
+  private projectiles: Projectile[] = [];
   systems: System[] = [];
   uiContainer!: Container;
   enemySystem!: EnemySystem;
@@ -64,6 +70,8 @@ export default class Game extends Scene {
   async load() {
     this.testTsEndpoints();
 
+    // console.warn(await trpc.getNarration.query("1"));
+    console.log(this.projectiles);
     this.player = new Player();
 
     this.uiContainer = new Container();
@@ -81,9 +89,29 @@ export default class Game extends Scene {
 
     this.initSystems();
 
-    this.addChild(this.player);
+    this.addEntity(this.player);
 
     this.spawnEnemies();
+  }
+
+  addEntity(entity: Entity) {
+    this.entities.push(entity);
+    this.addChild(entity);
+  }
+
+  spawnEnemy(x = 0, y = 0) {
+    const enemy = new Enemy();
+
+    enemy.x = x;
+    enemy.y = y;
+
+    this.enemies.push(enemy);
+    this.addEntity(enemy);
+  }
+
+  spawnProjectile(projectile: Projectile) {
+    this.projectiles.push(projectile);
+    this.addChild(projectile);
   }
 
   initUi() {
@@ -97,22 +125,23 @@ export default class Game extends Scene {
     });
 
     xp.y = hp.height;
-    this.player.on("CHANGE_HP" as any, (newHP: number) => {
-      hp.update(newHP);
+    this.player.on("CHANGE_HP" as any, (newHp: number) => {
+      hp.update(newHp);
     });
     this.uiContainer.addChild(hp, xp);
   }
 
   initSystems() {
-    this.enemySystem = new EnemySystem(this, this.player);
+    this.enemySystem = new EnemySystem(this.enemies, this.player);
     this.addSystem(this.enemySystem);
 
     this.playerSystem = new PlayerSystem(this.player);
     this.addSystem(this.playerSystem);
 
     this.addSystem(
-      new ProjectileSystem([...this.enemySystem.enemies, this.player], this)
+      new EntityAttackSystem(this.entities, this.spawnProjectile.bind(this))
     );
+    //this.addSystem(new ProjectileMoveSystem(this.projectiles));
 
     Ticker.shared.add((delta) => {
       this.updateSystems(delta);
@@ -159,10 +188,7 @@ export default class Game extends Scene {
     const enemiesAmount = 10;
 
     for (let i = 0; i < enemiesAmount; i++) {
-      this.enemySystem.spawnEnemy(
-        Math.random() * 700 + 100,
-        Math.random() * 700 + 100
-      );
+      this.spawnEnemy(Math.random() * 700 + 100, Math.random() * 700 + 100);
     }
   }
 
@@ -178,6 +204,8 @@ export default class Game extends Scene {
   }
 
   updateSystems(delta: number) {
+    //clean up
+
     for (const system of this.systems) {
       system.update(delta);
     }

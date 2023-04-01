@@ -1,10 +1,10 @@
 import { Graphics, Sprite } from "pixi.js";
-import Entity from "./Entity"
+import Entity from "./Entity";
 
 export default class Enemy extends Entity {
   sprite!: Sprite | Graphics;
 
-  constructor(public hp = 100, public type = "normal") {
+  constructor(public hp = 10, public type = "normal") {
     super();
     this.speed = 2;
     this.sprite = new Graphics();

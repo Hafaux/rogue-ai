@@ -11,10 +11,11 @@ export default class Player extends Entity {
 
   constructor(public hp = 100) {
     super();
-    this.type = "Player"
+    this.type = "Player";
     this.canAttack = true;
     this.projectileLifespan = 5;
     this.attackSpeed = 2.5;
+    this.attackPower = 100;
     this.speed = 10;
     this.velocity = {
       x: 0,

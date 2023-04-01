@@ -5,11 +5,16 @@ export default class Projectile extends Container {
   sprite: Graphics;
   life = 0;
   speed = 5;
-
+  data: {
+    projectileLifespan: number;
+  } = {
+    projectileLifespan: 0,
+  };
   constructor(
     x: number,
     y: number,
     public target: Entity,
+    private creator: Entity,
     public direction: Vec2D = {
       x: 0,
       y: 0,
@@ -17,6 +22,16 @@ export default class Projectile extends Container {
   ) {
     super();
     //
+    // this.data = {
+    //   ...this.data,
+    //   ...
+    // }
+
+    for (const key in this.data) {
+      // @ts-ignore
+      this.data[key] = creator[key];
+    }
+
     this.sprite = new Graphics();
 
     this.position.set(x, y);
@@ -26,5 +41,17 @@ export default class Projectile extends Container {
     this.sprite.endFill();
 
     this.addChild(this.sprite);
+  }
+
+  checkHit() {
+    // check evasion
+    return true;
+  }
+
+  onHit(hitTarget: Entity) {
+    // apply debufs calculate damage stuff like that
+    // resists
+    if (hitTarget.destroyed) return;
+    hitTarget.applyDamage(this.attackPower);
   }
 }
