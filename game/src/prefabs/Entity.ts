@@ -12,6 +12,8 @@ export default class Entity extends Container {
   critChance = 1;
   critMultiplier = 1;
 
+  pathToTarget: [number, number][] = [];
+
   iframes = 1; // seconds
   iframeActive = false;
   hp = 100;

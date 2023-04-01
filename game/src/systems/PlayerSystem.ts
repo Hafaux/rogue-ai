@@ -11,7 +11,10 @@ export default class PlayerSystem implements System {
     RIGHT: boolean;
   };
 
-  constructor(private player: Player) {
+  constructor(
+    private player: Player,
+    private collisionMatrix: Array<number>[]
+  ) {
     this.keyboard.onAction(({ action, buttonState }) => {
       if (buttonState === "pressed") this.onActionPress(action);
       else if (buttonState === "released") this.onActionRelease(action);
@@ -75,8 +78,41 @@ export default class PlayerSystem implements System {
       ? this.player.speed
       : 0;
 
-    this.player.x += xMovement * delta;
-    this.player.y += yMovement * delta;
+    const { current, previous } = this.player.tileCoords;
+
+    const newCoords = {
+      x: Math.floor((this.player.x + xMovement * delta) / (32 * 10)),
+      y: Math.floor((this.player.y + yMovement * delta) / (32 * 10)),
+    };
+
+    if (JSON.stringify(newCoords) !== JSON.stringify(current)) {
+      this.player.tileCoords.previous = {
+        ...this.player.tileCoords.current,
+      };
+
+      this.player.tileCoords.current = newCoords;
+
+      console.log("PLAYER TILE CHANGE", newCoords);
+
+      this.player.emit("TILE_CHANGE" as any, newCoords);
+    }
+
+    const colliding = this.collisionMatrix[current.y][current.x];
+
+    if (colliding) {
+      // const safeDir = {
+      //   x: previous.x - current.x,
+      //   y: previous.y - current.y,
+      // };
+
+      // this.player.x += 1 * safeDir.x;
+      // this.player.y += 1 * safeDir.y;
+
+      return;
+    } else {
+      this.player.x += xMovement * delta;
+      this.player.y += yMovement * delta;
+    }
 
     // if (this.player.x < 0) {
     //   this.player.x = 0;

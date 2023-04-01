@@ -14,6 +14,8 @@ import Enemy from "../prefabs/Enemy";
 import Entity from "../prefabs/Entity";
 import Projectile from "../prefabs/Projectile";
 
+import { AStarFinder } from "astar-typescript";
+
 // import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 
 // import type { AppRouter } from "../../../backend/src/router";
@@ -77,17 +79,29 @@ export default class Game extends Scene {
     this.uiContainer = new Container();
 
     this.utils.viewport.parent.addChild(this.uiContainer);
-
     this.utils.viewport.follow(this.player);
 
     this.player.x = window.innerWidth / 2;
     this.player.y = window.innerHeight / 2;
 
-    this.addBackground();
+    const collisionMatrix = this.addBackground();
+
+    const aStar = new AStarFinder({
+      grid: {
+        matrix: collisionMatrix,
+      },
+    });
+
+    const start = { x: 0, y: 0 };
+    const end = { x: 4, y: 2 };
+
+    const path = aStar.findPath(start, end);
+
+    console.log(path);
 
     this.initUi();
 
-    this.initSystems();
+    this.initSystems(collisionMatrix);
 
     this.addEntity(this.player);
 
@@ -131,11 +145,11 @@ export default class Game extends Scene {
     this.uiContainer.addChild(hp, xp);
   }
 
-  initSystems() {
+  initSystems(collisionMatrix: Array<number>[]) {
     this.enemySystem = new EnemySystem(this.enemies, this.player);
     this.addSystem(this.enemySystem);
 
-    this.playerSystem = new PlayerSystem(this.player);
+    this.playerSystem = new PlayerSystem(this.player, collisionMatrix);
     this.addSystem(this.playerSystem);
 
     this.addSystem(
@@ -154,7 +168,13 @@ export default class Game extends Scene {
     const mapGen = new MapGenerator(this.utils.renderer, 32, 32, "dungeonGen");
     const mapBuffer = mapGen.generate(1000);
 
+    const collisionMatrix: Array<number>[] = [];
+
+    console.warn(mapGen);
+
     for (let y = 0; y < mapGen.height; y++) {
+      collisionMatrix.push([]);
+
       for (let x = 0; x < mapGen.width; x++) {
         const i = x + y * mapGen.height;
 
@@ -162,13 +182,17 @@ export default class Game extends Scene {
 
         const brightness = (color[0] + color[1] + color[2]) / 3;
 
+        collisionMatrix[y][x] = brightness < 0.01 ? 1 : 0;
+
         tilemap.tile(
-          brightness < 0.01 ? "grass.png" : "brick.png",
+          brightness < 0.01 ? "brick.png" : "grass.png",
           x * 32,
           y * 32
         );
       }
     }
+
+    console.warn(collisionMatrix);
 
     tilemap.scale.set(10);
 
@@ -185,6 +209,8 @@ export default class Game extends Scene {
     minimap.x = this.utils.viewport.screenWidth - minimap.width;
 
     this.uiContainer.addChild(minimap);
+
+    return collisionMatrix;
   }
 
   spawnEnemies() {
