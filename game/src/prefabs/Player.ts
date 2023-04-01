@@ -1,27 +1,26 @@
-import { Container, Graphics, Text } from "pixi.js";
+import { Graphics, Text } from "pixi.js";
+import Entity from "./Entity";
 
-export default class Player extends Container {
+export default class Player extends Entity {
   sprite: Graphics;
-
-  speed = 10;
 
   velocity: {
     x: number;
     y: number;
   };
 
-  constructor(private hp = 100) {
+  constructor(public hp = 100) {
     super();
-
+    
+    this.speed = 10;
     this.velocity = {
       x: 0,
       y: 0,
     };
-
     this.sprite = new Graphics();
 
     this.sprite.beginFill(0xff00ff);
-    this.sprite.drawCircle(0, 0, 50);
+    this.sprite.drawCircle(0, 0, this.size);
     this.sprite.endFill();
 
     const text = new Text("PLAYER", {
