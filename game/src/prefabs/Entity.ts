@@ -13,6 +13,13 @@ export default class Entity extends Container {
   critMultiplier = 1;
 
   pathToTarget: number[][] = [];
+  currentPathTarget: {
+    x: number;
+    y: number;
+  } = {
+    x: 0,
+    y: 0,
+  };
 
   iframes = 1; // seconds
   iframeActive = false;

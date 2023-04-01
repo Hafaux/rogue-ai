@@ -226,7 +226,7 @@ export default class Game extends Scene {
   }
 
   spawnEnemies() {
-    const enemiesAmount = 1;
+    const enemiesAmount = 3;
 
     for (let i = 0; i < enemiesAmount; i++) {
       this.spawnEnemy(Math.random() * 700 + 100, Math.random() * 700 + 100);

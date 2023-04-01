@@ -28,7 +28,7 @@ export default class EnemySystem implements System {
       diagonalAllowed: false,
     });
 
-    const recalcTargetPath = (newCoords: { x: number; y: number }) => {
+    const recalcTargetPath = () => {
       for (const enemy of enemies) {
         enemy.pathToTarget = this.aStar.findPath(
           enemy.tileCoords.current,
