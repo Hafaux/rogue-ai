@@ -60,14 +60,16 @@ export default class AssetGeneratpor {
 
     const setting = await this.getSetting();
 
-    const promises: Promise<StableResponse>[] = [];
+    const promises: Promise<unknown>[] = [];
 
     for (const asset of this.assets.flat) {
       const description = setting.assets[asset].join(", ");
 
       const prompt = this.flatPrompt(asset, description);
 
-      promises.push(this.stableDiffusion.request(prompt));
+      promises.push(
+        this.stableDiffusion.saveImage(prompt, `./assets/input/${asset}.png`)
+      );
     }
 
     for (const asset of this.assets.isometric) {
@@ -75,11 +77,13 @@ export default class AssetGeneratpor {
 
       const prompt = this.isometricPrompt(asset, description);
 
-      promises.push(this.stableDiffusion.request(prompt));
+      promises.push(
+        this.stableDiffusion.saveImage(prompt, `./assets/input/${asset}.png`)
+      );
     }
 
-    const assets = await Promise.all(promises);
+    await Promise.all(promises);
 
-    console.log(assets.map((res) => res.filenames[0]));
+    this.texturePacker.pack(false);
   }
 }
