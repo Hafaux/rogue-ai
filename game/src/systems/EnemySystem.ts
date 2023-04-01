@@ -19,8 +19,6 @@ export default class EnemySystem implements System {
       readonly area: number;
     }
   ) {
-    console.warn(this.worldSize.area);
-
     this.aStar = new AStarFinder({
       grid: {
         matrix: collisionMatrix,
@@ -77,8 +75,6 @@ export default class EnemySystem implements System {
     };
 
     if (JSON.stringify(newCoords) !== JSON.stringify(current)) {
-      console.log(newCoords);
-
       enemy.tileCoords.previous = {
         ...enemy.tileCoords.current,
       };

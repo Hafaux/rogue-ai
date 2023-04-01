@@ -83,7 +83,7 @@ export default class PlayerSystem implements System {
       ? this.player.speed
       : 0;
 
-    const getNewCoords = (
+    const getMappedCoords = (
       {
         width,
         height,
@@ -105,33 +105,39 @@ export default class PlayerSystem implements System {
       };
     };
 
-    const newCoords = getNewCoords(this.player);
-    const newCoordsRaw = getNewCoords();
-    const newCoordsMirror = getNewCoords({
-      width: -this.player.width,
-      height: -this.player.height,
-    });
+    const newCoordsCenter = getMappedCoords();
 
     if (
-      JSON.stringify(newCoordsRaw) !==
+      JSON.stringify(newCoordsCenter) !==
       JSON.stringify(this.player.tileCoords.current)
     ) {
       this.player.tileCoords.previous = {
         ...this.player.tileCoords.current,
       };
 
-      this.player.tileCoords.current = newCoordsRaw;
+      this.player.tileCoords.current = newCoordsCenter;
 
-      this.player.emit("TILE_CHANGE" as any, newCoords);
+      this.player.emit("TILE_CHANGE" as any, newCoordsCenter);
     }
 
-    const colliding = this.collisionMatrix[newCoords.y][newCoords.x];
-    const collidingMirror =
-      this.collisionMatrix[newCoordsMirror.y][newCoordsMirror.x];
+    const directions = [
+      [1, 1],
+      [-1, 1],
+      [-1, -1],
+      [1, -1],
+    ];
 
-    if (colliding || collidingMirror) {
-      return;
-    }
+    const colliders = directions.map(([x, y]) => {
+      const coords = getMappedCoords({
+        width: x * this.player.width,
+        height: y * this.player.height,
+      });
+
+      return this.collisionMatrix[coords.y][coords.x];
+    });
+
+    if (colliders.find(Boolean)) return;
+
     this.player.x += xMovement * delta;
     this.player.y += yMovement * delta;
   }
