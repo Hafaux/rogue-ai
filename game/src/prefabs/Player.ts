@@ -1,4 +1,4 @@
-import { Graphics, Text } from "pixi.js";
+import { Graphics } from "pixi.js";
 import Entity from "./Entity";
 
 export default class Player extends Entity {
@@ -39,13 +39,6 @@ export default class Player extends Entity {
     this.sprite.drawCircle(0, 0, this.size);
     this.sprite.endFill();
 
-    const text = new Text("PLAYER", {
-      fontSize: 20,
-    });
-
-    text.x = -40;
-    text.y = -20;
-
-    this.addChild(this.sprite, text);
+    this.addChild(this.sprite);
   }
 }
