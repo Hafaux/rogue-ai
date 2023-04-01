@@ -5,7 +5,7 @@ dotenv.config();
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import { appRouter } from "./router";
 import cors from "cors";
-import StableDiffusion from "./api/stable_diffusion";
+import AssetGeneratpor from "./asset_generation/asset_generator";
 
 createHTTPServer({
   middleware: cors(),
@@ -16,8 +16,4 @@ createHTTPServer({
   },
 }).listen(2023);
 
-(async () => {
-  console.log(
-    await new StableDiffusion().request({ prompt: "cute dog with a hat" })
-  );
-})();
+new AssetGeneratpor().generate("alien");
