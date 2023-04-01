@@ -5,7 +5,7 @@ import datetime
 from floodFill import remove_background, resize_image
 import numpy as np
 
-model_id = "stabilityai/stable-diffusion-2-1"
+model_id = "stabilityai/stable-diffusion-2-1-base"
 
 pipe = StableDiffusionPipeline.from_pretrained(
     model_id,
@@ -37,8 +37,9 @@ async def process_data(input_data: dict):
         name = f'{date}-{id}'
         img.save(f"/home/martin/images/{name}-orig.png")
         img = remove_background(np.array(img))
-        img.save(f"/home/martin/images/{name}-removed-bg.png")
-        img = resize_image(np.array(img), 32)
+        if input_data.get("remove_background", True):
+            img.save(f"/home/martin/images/{name}-removed-bg.png")
+            img = resize_image(np.array(img), 32)
         img.save(f"/home/martin/images/{name}.png")
         names.append(name)
 
