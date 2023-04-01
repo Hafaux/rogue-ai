@@ -34,17 +34,18 @@ export interface Narration {
 export class Narrator {
   private static narratorName = "Narrator";
 
+  private static narrationMarkers = ["performs well", "performs poorly"];
+
   private static narrationPromptBegin = `
         You are an enemy in a rogue-like game. Here is the progress so far.`;
 
   private static narrationPromptEnd = `
         Consider the following three scenarios and give suitable narration to each of them:
         1. Player performs an action well. (Cheer him or/and compare to his previous attempts)
-        2. Performs performs an action poorly. (Taunt him) 
-        Could you provide 3 short narrations sentences for both of them?
-        Please output in JSON format but just before the meaningful part of the output write
-        "NARRATIONS_BEGIN" and just after the end of it write "NARRATIONS_END".
-        `;
+        2. Performs performs an action poorly. (Taunt him)
+        Could you provide 3 short narrations sentences for both of them? Make sure that the
+        responses are in 2nd person. Do not react in present tense. Please output in JSON format
+        such as 'performs well': [...], 'performs poorly': [...]. `;
 
   private used: Narration[] = [];
   private feed: Narration[] = [];
@@ -71,14 +72,23 @@ export class Narrator {
   }
 
   private prefillFeed(): void {
-    // TODO: Use OpenAI and 11Labs to acquire new feed.
-    //       Prompt GPT with the history of the conversation.
+    // TODO: Use 11Labs to produce sound for the narration.
     const history = this.history();
     const prompt =
       Narrator.narrationPromptBegin + history + Narrator.narrationPromptEnd;
     const answer = GptController.request(prompt);
-    console.log("DEBUG: " + answer);
-
-    // TODO: Parse output of GPT.
+    answer.then((answerData) => {
+      const suggestedNarrations = GptController.extractJson(answerData);
+      let narrations: Narration[] = [];
+      for (let marker of Narrator.narrationMarkers) {
+        for (let narration of suggestedNarrations[marker]) {
+          narrations.push({
+            event: marker,
+            response: narration,
+            audio: undefined,
+          });
+        }
+      }
+    });
   }
 }

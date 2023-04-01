@@ -2,16 +2,17 @@ import { initTRPC } from "@trpc/server";
 import z from "zod";
 import { Player } from "./player";
 import { Narrator, Narration } from "./narrator/narrator";
+import { platform } from "os";
 
 const t = initTRPC.create();
 
 const publicProcedure = t.procedure;
 
 // FIXME: Maybe unglobal this.
-let activePlayers: Player[];
+let activePlayers: Player[] = [];
 
 export const appRouter = t.router({
-  // Mark player is begin active.
+  // Mark player is active.
   activatePlayer: publicProcedure
     .input(
       z.object({
@@ -27,7 +28,7 @@ export const appRouter = t.router({
         narrator: new Narrator(),
       };
       activePlayers.push(player);
-      console.info(`Activating player ${player}`);
+      console.log(`Activating player ${JSON.stringify(player)}`);
     }),
 
   deactivatePlayer: publicProcedure
@@ -41,7 +42,7 @@ export const appRouter = t.router({
       activePlayers = activePlayers.filter(
         (player) => player.id !== input.playerId
       );
-      console.info(`Deactivating player with id=${input.playerId}`);
+      console.log(`Deactivating player with id=${input.playerId}`);
     }),
 
   // Acquire a string repr of a player by id. Useful to check whether player is initialized.
@@ -54,7 +55,7 @@ export const appRouter = t.router({
     .query((req) => {
       const input = req.input;
       const player = activePlayers.find((p) => p.id === input.playerId);
-      console.info(`Checking player ${player}`);
+      console.log(`Checking player ${JSON.stringify(player)}`);
       return JSON.stringify(player);
     }),
 
@@ -67,12 +68,24 @@ export const appRouter = t.router({
     )
     .query((req) => {
       const input = req.input;
-      const player = activePlayers.find(
+      console.log("getNarration called: %s", JSON.stringify(input));
+      const maybe_player: unknown = activePlayers.find(
         (p) => p.id === input.playerId
-      ) as Player;
+      );
+      console.log(maybe_player);
+      if (maybe_player === undefined) {
+        throw new Error(
+          `getNarration: No such player with id=${input.playerId}`
+        );
+      }
+
+      const player = maybe_player as Player;
+      console.log(player);
       const nextBatch = player.narrator.nextBatch();
-      console.info(
-        `Player ${player.id} gets new narration batch: '${nextBatch}'`
+      console.log(
+        `Player ${player.id} gets new narration batch: '${JSON.stringify(
+          nextBatch
+        )}'`
       );
       return JSON.stringify(nextBatch);
     }),
@@ -92,7 +105,7 @@ export const appRouter = t.router({
       ) as Player;
       const narration = JSON.parse(input.narrationSerial) as Narration;
       player.narrator.useNarration(narration);
-      console.info(`Player ${player.id} uses narration '${narration}'`);
+      console.log(`Player ${player.id} uses narration '${narration}'`);
     }),
 });
 
