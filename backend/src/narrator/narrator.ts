@@ -59,17 +59,22 @@ export class Narrator {
       "Narration feed is not big enough!"
     );
 
-        const narrationBatch = this.feed.splice(0, narrationBatchSize);
-        return narrationBatch;
+  nextBatch(): Narration[] {
+    if (this.feed.length <= narrationFeedSize / 2) {
+      this.prefillFeed();
     }
 
-    private history(): string {
-        let history: string = "";
-        for (const u of this.used) {
-            history += `*${u.event}*\n${Narrator.narratorName}: "${u.response}"\n`
-        }
-        return history;
+    const narrationBatch = this.feed.splice(0, narrationBatchSize);
+    return narrationBatch;
+  }
+
+  private history(): string {
+    let history: string = "";
+    for (const u of this.used) {
+      history += `*${u.event}*\n${Narrator.narratorName}: "${u.response}"\n`;
     }
+    return history;
+  }
 
     private prefillFeed(): void {
         // TODO: Use OpenAI and 11Labs to acquire new feed.
