@@ -66,7 +66,7 @@ export const appRouter = t.router({
         playerId: z.string(),
       })
     )
-    .query((req) => {
+    .query(async (req) => {
       const input = req.input;
       console.log("getNarration called: %s", JSON.stringify(input));
       const maybe_player: unknown = activePlayers.find(
@@ -80,8 +80,7 @@ export const appRouter = t.router({
       }
 
       const player = maybe_player as Player;
-      console.log(player);
-      const nextBatch = player.narrator.nextBatch();
+      const nextBatch = await player.narrator.nextBatch();
       console.log(
         `Player ${player.id} gets new narration batch: '${JSON.stringify(
           nextBatch

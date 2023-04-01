@@ -1,4 +1,6 @@
+import { assert } from "console";
 import { GptController } from "../api/gpt_controller";
+import * as imaginaryNarrationsIncluded from "./imaginary.json";
 
 // Spec :D
 // -------
@@ -25,27 +27,29 @@ const narrationFeedSize: number = 10;
 export interface Narration {
   response: string;
   audio: unknown;
-
-  // TODO: The event is fixed among a couple of different actions that may happen
-  //       such as 'player gets hit', 'player is silly', 'player performs well'.
   event: string;
 }
 
 export class Narrator {
-  private static narratorName = "Narrator";
+  private static narratorName = "You";
 
-  private static narrationMarkers = ["performs well", "performs poorly"];
+  private static narrationMarkers = [
+    "player performs well",
+    "player performs poorly",
+  ];
 
   private static narrationPromptBegin = `
-        You are an enemy in a rogue-like game. Here is the progress so far.`;
+You are an enemy in a rogue-like game.\n`;
 
   private static narrationPromptEnd = `
-        Consider the following three scenarios and give suitable narration to each of them:
-        1. Player performs an action well. (Cheer him or/and compare to his previous attempts)
-        2. Performs performs an action poorly. (Taunt him)
-        Could you provide 3 short narrations sentences for both of them? Make sure that the
-        responses are in 2nd person. Do not react in present tense. Please output in JSON format
-        such as 'performs well': [...], 'performs poorly': [...]. `;
+Consider the following three scenarios and give suitable narration to each of them:
+1. Player performs an action well. (Cheer him or/and compare to his previous attempts)
+2. Performs performs an action poorly. (Taunt him)
+Could you provide 3 short narrations sentences for both of them? Make sure that the
+responses are in 2nd person. Do not react in present tense. Please output in JSON format
+such as 'player performs well': [...], 'player performs poorly': [...].\n`;
+
+  private static imaginaryNarrations = imaginaryNarrationsIncluded;
 
   private used: Narration[] = [];
   private feed: Narration[] = [];
@@ -54,41 +58,69 @@ export class Narrator {
     this.used.push(narration);
   }
 
-  nextBatch(): Narration[] {
+  async nextBatch(): Promise<Narration[]> {
+    console.log("Narrator: producing nextBatch()");
     if (this.feed.length <= narrationFeedSize / 2) {
-      this.prefillFeed();
+      console.log("Narrator: prefilling feed");
+      await this.prefillFeed();
+      console.log("Narrator done prefilling");
     }
+
+    assert(
+      this.feed.length > narrationBatchSize,
+      "Feed was not successfully refilled!"
+    );
 
     const narrationBatch = this.feed.splice(0, narrationBatchSize);
     return narrationBatch;
   }
 
   private history(): string {
-    let history: string = "";
-    for (const u of this.used) {
+    let toLinearize = this.used;
+    let history: string = " Here is the progress so far: ";
+    if (this.used.length == 0) {
+      toLinearize = this.parseNarrationListing(
+        JSON.stringify(Narrator.imaginaryNarrations)
+      );
+      // Shuffle so that the imaginary history isn't "good, good, ..., good, bad, bad, ... bad".
+      toLinearize.sort(() => Math.random() - 0.5);
+      history = ""; // It hasn't happend, you know.
+    }
+
+    for (const u of toLinearize) {
       history += `*${u.event}*\n${Narrator.narratorName}: "${u.response}"\n`;
     }
     return history;
   }
 
-  private prefillFeed(): void {
-    // TODO: Use 11Labs to produce sound for the narration.
+  private parseNarrationListing(_data: any): Narration[] {
+    const data = JSON.parse(_data);
+    let narrations: Narration[] = [];
+    for (const marker of Narrator.narrationMarkers) {
+      for (const narration of data[marker]) {
+        narrations.push({
+          event: marker,
+          response: narration,
+          // TODO: Use 11Labs to produce sound for the narration.
+          audio: undefined,
+        });
+      }
+    }
+
+    return narrations;
+  }
+
+  private async prefillFeed() {
     const history = this.history();
     const prompt =
       Narrator.narrationPromptBegin + history + Narrator.narrationPromptEnd;
-    const answer = GptController.request(prompt);
-    answer.then((answerData) => {
-      const suggestedNarrations = GptController.extractJson(answerData);
-      let narrations: Narration[] = [];
-      for (let marker of Narrator.narrationMarkers) {
-        for (let narration of suggestedNarrations[marker]) {
-          narrations.push({
-            event: marker,
-            response: narration,
-            audio: undefined,
-          });
-        }
-      }
-    });
+    const answer = await GptController.request(prompt);
+    const suggestedNarrations: object = GptController.extractJson(answer);
+    const newFeed = this.parseNarrationListing(
+      JSON.stringify(suggestedNarrations)
+    );
+    for (const n of newFeed) {
+      this.feed.push(n);
+    }
   }
 }
