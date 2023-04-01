@@ -6,15 +6,6 @@ from floodFill import remove_background, resize_image
 import numpy as np
 import cv2
 
-model_id = "stabilityai/stable-diffusion-2-1-base"
-
-pipe = StableDiffusionPipeline.from_pretrained(
-    model_id,
-    scheduler=EulerDiscreteScheduler.from_pretrained(model_id, subfolder="scheduler"),
-    torch_dtype=torch.float16
-)
-pipe = pipe.to("cuda")
-
 
 original_conv2d_init = None
 
@@ -32,6 +23,16 @@ def patch_conv(cls, use_circular_padding):
     else:
         cls.__init__ = original_conv2d_init
 
+patch_conv(torch.nn.Conv2d, True)
+
+model_id = "stabilityai/stable-diffusion-2-1-base"
+
+pipe = StableDiffusionPipeline.from_pretrained(
+    model_id,
+    scheduler=EulerDiscreteScheduler.from_pretrained(model_id, subfolder="scheduler"),
+    torch_dtype=torch.float16
+)
+pipe = pipe.to("cuda")
 
 from fastapi import FastAPI
 
