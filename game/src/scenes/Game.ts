@@ -40,6 +40,7 @@ export default class Game extends Scene {
   enemySystem!: EnemySystem;
   playerSystem!: PlayerSystem;
   worldSize!: { tileSize: number; scale: number; readonly area: number };
+  collisionMatrix!: CollisionMatrix;
 
   async testTsEndpoints() {
     // await trpc.activatePlayer.query({
@@ -89,9 +90,9 @@ export default class Game extends Scene {
 
     this.utils.viewport.parent.addChild(this.uiContainer);
 
-    const collisionMatrix = this.addBackground();
+    this.collisionMatrix = this.addBackground();
 
-    this.spawnPlayer(collisionMatrix);
+    this.spawnPlayer(this.collisionMatrix);
 
     this.utils.viewport.follow(this.player);
 
@@ -100,11 +101,11 @@ export default class Game extends Scene {
 
     this.initUi();
 
-    this.initSystems(collisionMatrix);
+    this.initSystems(this.collisionMatrix);
 
     this.addEntity(this.player);
 
-    this.spawnEnemies();
+    this.spawnEnemies(this.collisionMatrix);
   }
 
   addEntity(entity: Entity) {
@@ -263,12 +264,59 @@ export default class Game extends Scene {
     return collisionMatrix;
   }
 
-  spawnEnemies() {
-    const enemiesAmount = 3;
+  spawnEnemies(collisionMatrix: CollisionMatrix) {
+    const secondsPerWave = 2;
+    const enemiesAmount = 4;
 
-    for (let i = 0; i < enemiesAmount; i++) {
-      this.spawnEnemy(Math.random() * 700 + 100, Math.random() * 700 + 100);
-    }
+    setInterval(() => {
+      const { current } = this.player.tileCoords;
+
+      for (let i = 0; i < enemiesAmount; i++) {
+        const dirs = [
+          [-1, -1],
+          [-1, 1],
+          [1, 1],
+          [1, -1],
+        ];
+
+        let randomDir = dirs[Math.floor(Math.random() * dirs.length)];
+
+        let enemiesPos;
+
+        const isPosValid = (pos: { x: number; y: number }) => {
+          return pos.x < 32 && pos.y >= 0 && pos.x > 0 && pos.x < 32;
+        };
+
+        for (let j = 1; j < 10; j++) {
+          try {
+            enemiesPos = {
+              x: current.x + randomDir[0] * j,
+              y: current.y + randomDir[1] * j,
+            };
+
+            if (!isPosValid(enemiesPos)) {
+              throw null;
+            }
+
+            if (!collisionMatrix[enemiesPos.y][enemiesPos.x]) break;
+            else {
+              throw null;
+            }
+          } catch (e) {
+            randomDir = dirs[Math.floor(Math.random() * dirs.length)];
+          }
+        }
+
+        if (enemiesPos && isPosValid(enemiesPos)) {
+          this.spawnEnemy(
+            enemiesPos.x * this.worldSize.area +
+              this.worldSize.area * Math.random(),
+            enemiesPos.y * this.worldSize.area +
+              this.worldSize.area * Math.random()
+          );
+        }
+      }
+    }, secondsPerWave * 1000);
   }
 
   onResize(width: number, height: number) {
@@ -287,6 +335,7 @@ export default class Game extends Scene {
     removeIfDestroyed(this.entities);
     removeIfDestroyed(this.enemies);
     removeIfDestroyed(this.projectiles);
+
     for (const projectile of this.projectiles) {
       const availableTargets = this.availableTargets.get(
         projectile.creatorStats.type
