@@ -5,9 +5,20 @@ import { CompositeTilemap } from "@pixi/tilemap";
 import EnemySystem from "../systems/EnemySystem";
 import { Ticker } from "pixi.js";
 import PlayerSystem from "../systems/PlayerSystem";
-import helloFromBackend from "@rogueai/backend";
 import { Sprite, Texture } from "pixi.js";
 import MapGenerator from "../core/MapGenerator";
+
+import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
+
+import type { AppRouter } from "../../../backend/src/router";
+
+const trpc = createTRPCProxyClient<AppRouter>({
+  links: [
+    httpBatchLink({
+      url: "http://localhost:2023",
+    }),
+  ],
+});
 
 export default class Game extends Scene {
   name = "Game";
@@ -19,7 +30,9 @@ export default class Game extends Scene {
   enemySystem!: EnemySystem;
   playerSystem!: PlayerSystem;
 
-  load() {
+  async load() {
+    console.warn(await trpc.getNarration.query("1"));
+
     this.player = new Player();
 
     this.player.x = window.innerWidth / 2;
@@ -74,8 +87,6 @@ export default class Game extends Scene {
     minimap.scale.set(4);
 
     this.addChild(minimap);
-
-    helloFromBackend();
   }
 
   spawnEnemies() {
