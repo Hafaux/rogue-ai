@@ -4,6 +4,7 @@ import uuid
 import datetime
 from floodFill import remove_background, resize_image
 import numpy as np
+import cv2
 
 model_id = "stabilityai/stable-diffusion-2-1-base"
 
@@ -35,6 +36,7 @@ async def process_data(input_data: dict):
         date = datetime.datetime.now().strftime("%d-%H:%M:%S.%f")
         id = uuid.uuid4()
         name = f'{date}-{id}'
+        img = np.array(img)
         img.save(f"/home/martin/images/{name}-orig.png")
         img = remove_background(np.array(img))
         if input_data.get("remove_background", True):
