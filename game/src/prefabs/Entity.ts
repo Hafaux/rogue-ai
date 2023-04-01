@@ -1,4 +1,4 @@
-import { Container, Ticker } from "pixi.js";
+import { Container } from "pixi.js";
 import { getEntityDirection } from "../utils/game";
 import Projectile from "./Projectile";
 
@@ -43,7 +43,9 @@ export default class Entity extends Container {
     return true;
   }
 
-  projectileOnHit(other: Entity) {}
+  projectileOnHit(other: Entity) {
+    return;
+  }
 
   getProjectile(entities: Entity[]) {
     if (!this.canAttack) return;
