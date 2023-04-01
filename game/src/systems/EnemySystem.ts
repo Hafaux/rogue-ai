@@ -19,33 +19,21 @@ export default class EnemySystem implements System {
       readonly area: number;
     }
   ) {
-    // this.worldSize = {
-    //   tileSize: 32,
-    //   scale: 10,
-
-    //   get area() {
-    //     return this.tileSize * this.scale;
-    //   },
-    // };
-
     console.warn(this.worldSize.area);
 
     this.aStar = new AStarFinder({
       grid: {
         matrix: collisionMatrix,
       },
+      diagonalAllowed: false,
     });
 
     const recalcTargetPath = (newCoords: { x: number; y: number }) => {
-      console.warn(newCoords);
-
       for (const enemy of enemies) {
         enemy.pathToTarget = this.aStar.findPath(
           enemy.tileCoords.current,
           this.playerRef.tileCoords.current
         );
-
-        console.warn(enemy.pathToTarget);
       }
     };
 
@@ -69,19 +57,10 @@ export default class EnemySystem implements System {
       y: pathTarget[1] * this.worldSize.area + this.worldSize.area / 2,
     };
 
-    // console.log(pathObj, enemy.tileCoords.current);
-
-    // const vec = {
-    //   x: pathTarget[0] * this.worldSize.area - enemy.x,
-    //   y: pathTarget[1] * this.worldSize.area - enemy.y,
-    // };
-
     const { vec, angle } = getDirection(pathObj, {
       x: enemy.x,
       y: enemy.y,
     });
-
-    console.log(vec);
 
     enemy.x -= vec.x * enemy.speed * delta;
     enemy.y -= vec.y * enemy.speed * delta;
