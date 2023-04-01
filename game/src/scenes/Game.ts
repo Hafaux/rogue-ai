@@ -9,17 +9,17 @@ import { Sprite, Texture } from "pixi.js";
 import MapGenerator from "../core/MapGenerator";
 import ProjectileSystem from "../systems/ProjectileSystem";
 
-import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
+// import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 
-import type { AppRouter } from "../../../backend/src/router";
+// import type { AppRouter } from "../../../backend/src/router";
 
-const trpc = createTRPCProxyClient<AppRouter>({
-  links: [
-    httpBatchLink({
-      url: "http://localhost:2023",
-    }),
-  ],
-});
+// const trpc = createTRPCProxyClient<AppRouter>({
+//   links: [
+//     httpBatchLink({
+//       url: "http://localhost:2023",
+//     }),
+//   ],
+// });
 
 export default class Game extends Scene {
   name = "Game";
@@ -32,9 +32,11 @@ export default class Game extends Scene {
   playerSystem!: PlayerSystem;
 
   async load() {
-    console.warn(await trpc.getNarration.query("1"));
+    // console.warn(await trpc.getNarration.query("1"));
 
     this.player = new Player();
+
+    this.utils.viewport.follow(this.player);
 
     this.player.x = window.innerWidth / 2;
     this.player.y = window.innerHeight / 2;
@@ -95,7 +97,7 @@ export default class Game extends Scene {
 
     minimap.scale.set(4);
 
-    this.addChild(minimap);
+    this.utils.viewport.parent.addChild(minimap);
   }
 
   spawnEnemies() {
