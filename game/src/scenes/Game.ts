@@ -8,6 +8,7 @@ import PlayerSystem from "../systems/PlayerSystem";
 import helloFromBackend from "@rogueai/backend";
 import { Sprite, Texture } from "pixi.js";
 import MapGenerator from "../core/MapGenerator";
+import ProjectileSystem from "../systems/ProjectileSystem";
 
 export default class Game extends Scene {
   name = "Game";
@@ -27,11 +28,7 @@ export default class Game extends Scene {
 
     this.addBackground();
 
-    this.enemySystem = new EnemySystem(this, this.player);
-    this.addSystem(this.enemySystem);
-
-    this.playerSystem = new PlayerSystem(this.player);
-    this.addSystem(this.playerSystem);
+    this.initSystems();
 
     this.addChild(this.player);
 
@@ -40,6 +37,18 @@ export default class Game extends Scene {
     Ticker.shared.add((delta) => {
       this.updateSystems(delta);
     });
+  }
+
+  initSystems() {
+    this.enemySystem = new EnemySystem(this, this.player);
+    this.addSystem(this.enemySystem);
+
+    this.playerSystem = new PlayerSystem(this.player);
+    this.addSystem(this.playerSystem);
+
+    this.addSystem(
+      new ProjectileSystem(this.enemySystem.enemies, this.player, this)
+    );
   }
 
   addBackground() {

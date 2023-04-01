@@ -1,6 +1,7 @@
 import { Container } from "pixi.js";
 import Enemy from "../prefabs/Enemy";
 import Player from "../prefabs/Player";
+import { getEntityDirection } from "../utils/game";
 
 export default class EnemySystem implements System {
   enemies: Enemy[] = [];
@@ -20,32 +21,8 @@ export default class EnemySystem implements System {
     this.world.addChild(enemy);
   }
 
-  getEntityDirection(entity: Container, targetEntity: Container) {
-    const x = targetEntity.x - entity.x;
-    const y = targetEntity.y - entity.y;
-
-    const vecSize = Math.sqrt(x * x + y * y);
-
-    const normalizedX = x / vecSize;
-    const normalizedY = y / vecSize;
-
-    const angle = Math.atan2(y, x);
-
-    return {
-      vec: {
-        x: normalizedX,
-        y: normalizedY,
-      },
-      distance: vecSize,
-      angle,
-    };
-  }
-
   playerCollision(enemy: Enemy, delta: number) {
-    const { vec, distance, angle } = this.getEntityDirection(
-      this.playerRef,
-      enemy
-    );
+    const { vec, distance, angle } = getEntityDirection(this.playerRef, enemy);
 
     enemy.rotation = angle;
 
@@ -66,7 +43,7 @@ export default class EnemySystem implements System {
     const distanceToEntity = 60;
 
     for (const otherEnemy of otherEnemies) {
-      const { vec, distance } = this.getEntityDirection(otherEnemy, enemy);
+      const { vec, distance } = getEntityDirection(otherEnemy, enemy);
 
       if (distance < distanceToEntity) {
         enemy.x += vec.x * enemy.speed * delta;
