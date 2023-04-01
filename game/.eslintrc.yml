@@ -7,5 +7,10 @@
       "plugin:@typescript-eslint/recommended",
       "plugin:prettier/recommended",
     ],
-  rules: { "quotes": [2, "double"], "indent": ["off", 2, { "SwitchCase": 1 }] },
+  rules:
+    {
+      "quotes": [2, "double"],
+      "indent": ["off", 2, { "SwitchCase": 1 }],
+      "@typescript-eslint/no-explicit-any": "off",
+    },
 }
