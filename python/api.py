@@ -50,7 +50,7 @@ async def process_data(input_data: dict):
       negative_prompt=input_data.get("negative_prompt"),
       num_images_per_prompt=input_data.get("num_images", 1),
       # generator=generator,
-      num_inference_steps=input_data.get("num_steps", 50)
+      num_inference_steps=input_data.get("num_steps", 16)
     )
 
     names = []
@@ -59,11 +59,10 @@ async def process_data(input_data: dict):
         id = uuid.uuid4()
         name = f'{date}-{id}'
         img = np.array(img)
+        cv2.imwrite(f"/home/martin/images/{name}-orig.png", img)
         if input_data.get("remove_background", True):
-            cv2.imwrite(f"/home/martin/images/{name}-orig.png", img)
             img = remove_background(np.array(img))
-
-        cv2.imwrite(f"/home/martin/images/{name}-removed-bg.png", img)
+            cv2.imwrite(f"/home/martin/images/{name}-removed-bg.png", img)
         img = resize_image(np.array(img), 32)
         cv2.imwrite(f"/home/martin/images/{name}.png", img)
         names.append(name)
