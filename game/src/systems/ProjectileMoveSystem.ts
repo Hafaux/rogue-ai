@@ -10,8 +10,6 @@ export default class ProjectileMoveSystem implements System {
   updateProjectile(delta: number, projectile: Projectile) {
     // projectile dead
     if (projectile.life > projectile.creatorStats.projectileLifespan) {
-      console.warn("PROJECTILE DEAD");
-
       projectile.destroy();
       return;
     }
@@ -22,7 +20,6 @@ export default class ProjectileMoveSystem implements System {
       //Projectile hit
       if (distance < 20) {
         // entity hit function
-        console.warn("HIT ENEMY", projectile.target);
         if (projectile.checkHit()) {
           projectile.onHit(projectile.target);
           projectile.destroy();

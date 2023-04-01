@@ -14,7 +14,7 @@ export default class Player extends Entity {
     this.type = "Player";
     this.canAttack = true;
     this.projectileLifespan = 5;
-    this.attackSpeed = 2.5;
+    this.attackSpeed = 0.5;
     this.attackPower = 100;
     this.speed = 10;
     this.size = 30;

@@ -28,10 +28,14 @@ export default class EnemySystem implements System {
 
     const recalcTargetPath = () => {
       for (const enemy of enemies) {
-        enemy.pathToTarget = this.aStar.findPath(
-          enemy.tileCoords.current,
-          this.playerRef.tileCoords.current
-        );
+        try {
+          enemy.pathToTarget = this.aStar.findPath(
+            enemy.tileCoords.current,
+            this.playerRef.tileCoords.current
+          );
+        } catch {
+          //
+        }
       }
     };
 
