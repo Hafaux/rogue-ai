@@ -28,11 +28,13 @@ export default class EnemySystem implements System {
 
     enemy.rotation = angle;
 
-    const distanceToPlayer = 100;
+    const distanceToPlayer = this.playerRef.size * 2;
 
     if (distance < distanceToPlayer) {
+      // player hit
       enemy.x += vec.x * enemy.speed * delta;
       enemy.y += vec.y * enemy.speed * delta;
+      this.playerRef.applyDamage(enemy.attackPower);
     } else {
       enemy.x -= vec.x * enemy.speed * delta;
       enemy.y -= vec.y * enemy.speed * delta;
@@ -42,12 +44,10 @@ export default class EnemySystem implements System {
   enemyCollision(enemy: Enemy, delta: number) {
     const otherEnemies = this.enemies.filter((e) => e !== enemy);
 
-    const distanceToEntity = 60;
-
     for (const otherEnemy of otherEnemies) {
       const { vec, distance } = getEntityDirection(otherEnemy, enemy);
 
-      if (distance < distanceToEntity) {
+      if (distance < otherEnemy.size * 2) {
         enemy.x += vec.x * enemy.speed * delta;
         enemy.y += vec.y * enemy.speed * delta;
       }

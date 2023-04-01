@@ -75,7 +75,9 @@ export default class Game extends Scene {
     });
 
     xp.y = hp.height;
-
+    this.player.on("CHANGE_HP" as any, (newHP: number) => {
+      hp.update(newHP);
+    });
     this.uiContainer.addChild(hp, xp);
   }
 
