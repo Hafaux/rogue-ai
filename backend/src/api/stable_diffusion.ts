@@ -24,11 +24,8 @@ export default class StableDiffusion {
   }
 
   async request(data: StableRequest) {
-    const response = (await axios.post(
-      this.url,
-      data,
-      this.config
-    )) as StableResponse;
+    const response = (await axios.post(this.url, data, this.config))
+      .data as StableResponse;
 
     return response;
   }
