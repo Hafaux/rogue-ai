@@ -19,9 +19,8 @@ export default class EnemySystem implements System {
     this.enemies.push(enemy);
 
     this.world.addChild(enemy);
-    
-    // @ts-ignore
-    this.world.emit("ENTITY_SPAWN", enemy);
+
+    this.world.emit("ENTITY_SPAWN" as any, enemy);
   }
 
   playerCollision(enemy: Enemy, delta: number) {

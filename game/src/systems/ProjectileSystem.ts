@@ -9,33 +9,26 @@ export default class ProjectileSystem implements System {
   timer = 0;
   projectiles: Map<Entity, Projectile[]> = new Map<Entity, Projectile[]>();
 
-  constructor(
-    private entities: Entity[],
-    private world: Container
-  ) {
-    for(const entity of [...entities]) {
-      this.projectiles.set(entity, new Array());
+  constructor(private entities: Entity[], private world: Container) {
+    for (const entity of [...entities]) {
+      this.projectiles.set(entity, []);
     }
-    //@ts-ignore
-    world.on("ENTITY_SPAWN", (entity: Entity) => {
+
+    world.on("ENTITY_SPAWN" as any, (entity: Entity) => {
       this.addEntity(entity);
     });
   }
 
-  addEntity(entity: Entity){
+  addEntity(entity: Entity) {
     this.entities.push(entity);
-    this.projectiles.set(entity, new Array());
+    this.projectiles.set(entity, []);
   }
 
   removeProjectile(entity: Entity, projectile: Projectile) {
     const projectileArray = this.projectiles.get(entity);
     if (projectileArray) {
-      projectileArray.splice(
-        projectileArray.indexOf(projectile),
-        1
-      );
+      projectileArray.splice(projectileArray.indexOf(projectile), 1);
     }
-
 
     projectile.destroy();
   }
@@ -44,35 +37,35 @@ export default class ProjectileSystem implements System {
     //
     const projectileArray = this.projectiles.get(entity);
 
-    if(projectileArray){
+    if (projectileArray) {
       for (const projectile of [...projectileArray]) {
         // for (const enemy of this.enemies) {
         // }
-        const projectileTarget = projectile.target //|| min() 
+        const projectileTarget = projectile.target; //|| min()
         const distance = getEntityDistance(projectile, projectileTarget);
-  
+
         //Projectile hit
         if (distance < 20) {
           // entity hit function
           console.warn("HIT ENEMY", projectile.target);
-          if(entity.projectileHit(projectileTarget)){
-            entity.projectileOnHit(projectileTarget)
+          if (entity.projectileHit(projectileTarget)) {
+            entity.projectileOnHit(projectileTarget);
             this.removeProjectile(entity, projectile);
             continue;
           }
         }
-  
+
         // projectile dead
         if (projectile.life > entity.projectileLifespan) {
           console.warn("PROJECTILE DEAD");
-  
+
           this.removeProjectile(entity, projectile);
-  
+
           continue;
         }
-  
+
         projectile.life += Ticker.shared.elapsedMS / 1000;
-  
+
         projectile.x -= projectile.direction.x * projectile.speed * delta;
         projectile.y -= projectile.direction.y * projectile.speed * delta;
       }
@@ -80,7 +73,6 @@ export default class ProjectileSystem implements System {
   }
 
   spawnProjectile(projectile: Projectile, entityOwner: Entity) {
-
     projectile.rotation = projectile.angle - Math.PI / 2;
 
     this.world.addChild(projectile);
@@ -94,11 +86,13 @@ export default class ProjectileSystem implements System {
     this.timer += Ticker.shared.elapsedMS / 1000;
     // const elapsedSeconds = (this.startTime - Ticker.shared.elapsedMS) / 1000;
     for (const entity of [...this.entities]) {
-  
       this.updateEntityProjectiles(delta, entity);
-      if (entity.canAttack && this.timer > entity.attackSpeed + entity.lastAttackTime) {
+      if (
+        entity.canAttack &&
+        this.timer > entity.attackSpeed + entity.lastAttackTime
+      ) {
         const projectile = entity.getProjectile(this.entities);
-        if(projectile) {
+        if (projectile) {
           this.spawnProjectile(projectile, entity);
         }
         entity.lastAttackTime = this.timer;
