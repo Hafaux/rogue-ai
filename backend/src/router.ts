@@ -3,6 +3,7 @@ import z from "zod";
 import { Player } from "./player";
 import { Narrator, Narration } from "./narrator/narrator";
 import { platform } from "os";
+import AssetGenerator from "./asset_generation/asset_generator";
 
 const t = initTRPC.create();
 
@@ -10,9 +11,24 @@ const publicProcedure = t.procedure;
 
 // FIXME: Maybe unglobal this.
 let activePlayers: Player[] = [];
+// FIXME: ditto
+let assetGenerator = new AssetGenerator();
 
 export const appRouter = t.router({
   // Mark player is active.
+  generateAssets: publicProcedure
+    .input(
+      z.object({
+        playerId: z.string(),
+        theme: z.string(),
+      })
+    )
+    .query(async (req) => {
+      const input = req.input;
+
+      return await assetGenerator.generate(input.theme);
+    }),
+
   activatePlayer: publicProcedure
     .input(
       z.object({

@@ -66,8 +66,7 @@ export default class TexturePacker {
       outputFilename: "spritesheet.json",
     },
     private inputPath = "./assets/input/",
-    private outputPath = "./assets/spritesheet/",
-    private pixelatedPath = "./assets/pixelated/"
+    private outputPath = "./assets/spritesheet/"
   ) {}
 
   private convertToPIXI(input: SharpSheet) {
@@ -99,49 +98,19 @@ export default class TexturePacker {
     return output;
   }
 
-  async pixelate(size = 32) {
-    const pattern = this.inputPath + "*.png";
-
-    const files = glob.sync(pattern);
-    fs.mkdirSync(this.pixelatedPath, { recursive: true });
-
-    const promises: Promise<unknown>[] = [];
-
-    for (const inputFile of files) {
-      const outFile = path.join(
-        this.pixelatedPath,
-        path.basename(inputFile, `${path.extname(inputFile)}.png`)
-      );
-
-      const sharpComplete = sharp(inputFile)
-        .resize({ width: size, height: size, kernel: sharp.kernel.nearest })
-        .png()
-        .toFile(outFile);
-
-      promises.push(sharpComplete);
-    }
-
-    await Promise.all(promises);
-  }
-
-  async pack(pixelate = true) {
+  async pack() {
     let inPath = this.inputPath;
-
-    if (pixelate) {
-      await this.pixelate();
-      inPath = this.pixelatedPath;
-    }
 
     await sharpsheet(inPath + "*.png", this.outputPath, this.options);
 
     const jsonPath = this.outputPath + this.options.outputFilename;
-
     const fileRaw = fs.readFileSync(jsonPath, { encoding: "utf-8" });
-
     const sharpSheetOut = JSON.parse(fileRaw) as SharpSheet;
 
     const pixiSheet = this.convertToPIXI(sharpSheetOut);
 
-    fs.writeFileSync(jsonPath, JSON.stringify(pixiSheet));
+    const imageData = fs.readFileSync(this.outputPath + pixiSheet.meta.image);
+
+    return { atlas: pixiSheet, image: imageData.toString("base64") };
   }
 }
