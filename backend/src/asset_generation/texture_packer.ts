@@ -109,7 +109,7 @@ export default class TexturePacker {
 
     const pixiSheet = this.convertToPIXI(sharpSheetOut);
 
-    const imageData = fs.readFileSync(pixiSheet.meta.image);
+    const imageData = fs.readFileSync(this.outputPath + pixiSheet.meta.image);
 
     return { atlas: pixiSheet, image: imageData.toString("base64") };
   }
