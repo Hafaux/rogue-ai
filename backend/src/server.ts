@@ -1,7 +1,10 @@
+import dotenv from "dotenv";
+
+dotenv.config();
+
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import { appRouter } from "./router";
 import cors from "cors";
-import TexturePacker from "./texturePacker";
 
 createHTTPServer({
   middleware: cors(),
@@ -11,7 +14,3 @@ createHTTPServer({
     return {};
   },
 }).listen(2023);
-
-const a = new TexturePacker();
-
-a.pack();
