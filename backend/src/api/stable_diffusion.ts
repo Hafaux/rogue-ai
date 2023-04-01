@@ -7,6 +7,8 @@ export type StableRequest = {
   negative_prompt?: string;
   num_inference_steps?: number;
   num_images_per_prompt?: number;
+  remove_background?: boolean;
+  tiling?: boolean;
 };
 
 export type StableResponse = {
