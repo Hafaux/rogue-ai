@@ -21,11 +21,13 @@
     "@trpc/server": "^10.18.0",
     "@types/node": "^18.15.11",
     "cors": "^2.8.5",
+    "glob": "^8.0.3",
     "sharp": "^0.32.0",
     "sharpsheet": "^0.0.8"
   },
   "devDependencies": {
     "@types/cors": "^2.8.13",
+    "@types/glob": "^8.1.0",
     "ts-node": "^10.9.1"
   }
 }
