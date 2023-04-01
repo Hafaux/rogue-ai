@@ -10,7 +10,7 @@ export default class Player extends Container {
     y: number;
   };
 
-  constructor(private hp = 0) {
+  constructor(private hp = 100) {
     super();
 
     this.velocity = {
