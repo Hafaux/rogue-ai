@@ -36,6 +36,8 @@ export default class Game extends Scene {
 
     this.player = new Player();
 
+    this.utils.viewport.follow(this.player);
+
     this.player.x = window.innerWidth / 2;
     this.player.y = window.innerHeight / 2;
 
@@ -95,7 +97,7 @@ export default class Game extends Scene {
 
     minimap.scale.set(4);
 
-    this.addChild(minimap);
+    this.utils.viewport.parent.addChild(minimap);
   }
 
   spawnEnemies() {

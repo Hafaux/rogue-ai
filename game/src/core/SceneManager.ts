@@ -2,12 +2,14 @@ import { Application, IRenderer } from "pixi.js";
 import Scene from "./Scene";
 import { Debug } from "../utils/debug";
 import AssetLoader from "./AssetLoader";
+import { Viewport } from "pixi-viewport";
 
 if (import.meta.env.DEV) Debug.init();
 
 export interface SceneUtils {
   assetLoader: AssetLoader;
   renderer: IRenderer;
+  viewport: Viewport;
 }
 
 export default class SceneManager {
@@ -16,6 +18,7 @@ export default class SceneManager {
   app: Application;
   sceneInstances = new Map<string, Scene>();
   currentScene?: Scene;
+  viewport: Viewport;
 
   constructor() {
     this.app = new Application({
@@ -27,6 +30,14 @@ export default class SceneManager {
     });
 
     window.__PIXI_APP__ = this.app;
+
+    this.viewport = new Viewport({
+      screenWidth: window.innerWidth,
+      screenHeight: window.innerHeight,
+      events: this.app.renderer.events,
+    });
+
+    this.app.stage.addChild(this.viewport);
 
     window.addEventListener("resize", (ev: UIEvent) => {
       const target = ev.target as Window;
@@ -61,7 +72,7 @@ export default class SceneManager {
     if (!this.currentScene)
       throw new Error(`Failed to initialize scene: ${sceneName}`);
 
-    this.app.stage.addChild(this.currentScene);
+    this.viewport.addChild(this.currentScene);
 
     if (this.currentScene.start) await this.currentScene.start();
 
@@ -76,7 +87,7 @@ export default class SceneManager {
 
       this.currentScene.destroy({ children: true });
     } else {
-      this.app.stage.removeChild(this.currentScene);
+      this.viewport.removeChild(this.currentScene);
     }
 
     if (this.currentScene.unload) await this.currentScene.unload();
@@ -88,6 +99,7 @@ export default class SceneManager {
     const sceneUtils = {
       assetLoader: new AssetLoader(),
       renderer: this.app.renderer,
+      viewport: this.viewport,
     };
 
     const scene = new this.sceneConstructors[sceneName](sceneUtils);
