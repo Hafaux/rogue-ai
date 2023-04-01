@@ -1,6 +1,7 @@
 import torch
 from diffusers import StableDiffusionPipeline, EulerDiscreteScheduler, DDIMScheduler
 import uuid
+import datetime
 
 model_id = "stabilityai/stable-diffusion-2-1"
 
@@ -32,7 +33,7 @@ async def process_data(input_data: dict):
         date = datetime.datetime.now().strftime("%d-%H:%M:%S.%f")
         id = uuid.uuid4()
         name = f'{date}-{id}'
-        img.save(f"/home/martin/images/{name}")
+        img.save(f"/home/martin/images/{name}.png")
         names.append(name)
 
     return { "filenames": names }
