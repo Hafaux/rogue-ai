@@ -5,6 +5,9 @@ import { CompositeTilemap } from "@pixi/tilemap";
 import EnemySystem from "../systems/EnemySystem";
 import { Ticker } from "pixi.js";
 import PlayerSystem from "../systems/PlayerSystem";
+import helloFromBackend from "@rogueai/backend";
+import { Sprite, Texture } from "pixi.js";
+import MapGenerator from "../core/MapGenerator";
 
 export default class Game extends Scene {
   name = "Game";
@@ -42,19 +45,37 @@ export default class Game extends Scene {
   addBackground() {
     const tilemap = new CompositeTilemap();
 
-    const width = 50;
-    const height = 50;
+    const mapGen = new MapGenerator(this.utils.renderer, 32, 32, "dungeonGen");
 
-    for (let x = 0; x < width; x++) {
-      for (let y = 0; y < height; y++) {
-        const idEdge =
-          x === 0 || y === 0 || x === width - 1 || y === height - 1;
+    const mapBuffer = mapGen.generate(1000);
 
-        tilemap.tile(idEdge ? "brick.png" : "grass.png", x * 32, y * 32);
+    for (let y = 0; y < mapGen.height; y++) {
+      for (let x = 0; x < mapGen.width; x++) {
+        const i = x + y * mapGen.height;
+
+        const color = mapBuffer.slice(i * 4, i * 4 + 4);
+
+        const brightness = (color[0] + color[1] + color[2]) / 3;
+
+        tilemap.tile(
+          brightness < 0.01 ? "brick.png" : "grass.png",
+          x * 32,
+          y * 32
+        );
       }
     }
 
     this.addChild(tilemap);
+
+    const minimap = Sprite.from(
+      Texture.fromBuffer(mapBuffer, mapGen.width, mapGen.height)
+    );
+
+    minimap.scale.set(4);
+
+    this.addChild(minimap);
+
+    helloFromBackend();
   }
 
   spawnEnemies() {

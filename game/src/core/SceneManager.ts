@@ -1,4 +1,4 @@
-import { Application } from "pixi.js";
+import { Application, IRenderer } from "pixi.js";
 import Scene from "./Scene";
 import { Debug } from "../utils/debug";
 import AssetLoader from "./AssetLoader";
@@ -7,6 +7,7 @@ if (import.meta.env.DEV) Debug.init();
 
 export interface SceneUtils {
   assetLoader: AssetLoader;
+  renderer: IRenderer;
 }
 
 export default class SceneManager {
@@ -86,6 +87,7 @@ export default class SceneManager {
   private async initScene(sceneName: string) {
     const sceneUtils = {
       assetLoader: new AssetLoader(),
+      renderer: this.app.renderer,
     };
 
     const scene = new this.sceneConstructors[sceneName](sceneUtils);
