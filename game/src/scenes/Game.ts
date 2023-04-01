@@ -6,7 +6,6 @@ import EnemySystem from "../systems/EnemySystem";
 import { Ticker } from "pixi.js";
 import PlayerSystem from "../systems/PlayerSystem";
 import helloFromBackend from "@rogueai/backend";
-import { getPixels } from "../utils/misc";
 import { Sprite, Texture } from "pixi.js";
 import MapGenerator from "../core/MapGenerator";
 
@@ -46,7 +45,7 @@ export default class Game extends Scene {
   addBackground() {
     const tilemap = new CompositeTilemap();
 
-    const mapGen = new MapGenerator(this.utils.renderer, 32, 32);
+    const mapGen = new MapGenerator(this.utils.renderer, 32, 32, "dungeonGen");
 
     const mapBuffer = mapGen.generate(1000);
 

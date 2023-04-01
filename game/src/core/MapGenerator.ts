@@ -8,9 +8,10 @@ export default class MapGenerator {
   constructor(
     private renderer: IRenderer,
     public width: number,
-    public height: number
+    public height: number,
+    referenceImage: string
   ) {
-    const [data, w, h] = getPixels(this.renderer, "dungeonGen");
+    const [data, w, h] = getPixels(this.renderer, referenceImage);
 
     this.model = new wfc.OverlappingModel(
       data,
