@@ -12,7 +12,7 @@ export default class Enemy extends Entity {
     this.type = "Enemy";
     this.dodge = 100;
 
-    this.attackPower = 40;
+    this.attackPower = 10;
 
     // this.sprite = new Sprite(texture);
     // this.sprite.scale.set(2);
