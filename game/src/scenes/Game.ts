@@ -13,12 +13,15 @@ import StatElement from "../ui/StatElement";
 import Enemy from "../prefabs/Enemy";
 import Entity from "../prefabs/Entity";
 import Projectile from "../prefabs/Projectile";
-import { getClosestTarget, removeIfDestroyed } from "../utils/game";
+import { getClosestTarget, removeIfDestroyed, tryChance } from "../utils/game";
+import Chest from "../prefabs/Chest";
+import ChestSystem from "../systems/ChestSystem";
 
 export default class Game extends Scene {
   name = "Game";
 
   private player!: Player;
+  private chests: Chest[] = [];
   private enemies: Enemy[] = [];
   private entities: Entity[] = [];
   private projectiles: Projectile[] = [];
@@ -295,6 +298,7 @@ export default class Game extends Scene {
     );
 
     this.addSystem(new ProjectileMoveSystem(this.projectiles));
+    this.addSystem(new ChestSystem(this.chests, this.player));
 
     Ticker.shared.add((delta) => {
       this.updateSystems(delta);
@@ -311,7 +315,7 @@ export default class Game extends Scene {
     const mapBuffer = mapGen.generate(1000);
 
     const collisionMatrix: CollisionMatrix = [];
-
+    let chestPityTimer = 0;
     const generateMap = (firstMap: boolean) => {
       const tilemap = new CompositeTilemap();
 
@@ -327,6 +331,25 @@ export default class Game extends Scene {
 
           if (firstMap) collisionMatrix[y][x] = brightness < 0.01 ? 1 : 0;
 
+          if (brightness >= 0.01) {
+            if (tryChance(1) || chestPityTimer > 20) {
+              const worldCoordsX =
+                x * this.worldSize.area + this.worldSize.area / 2;
+              const worldCoordsY =
+                y * this.worldSize.area + this.worldSize.area / 2;
+
+              const chest = new Chest(this.spritesheet.textures.enemy);
+
+              chest.x = worldCoordsX;
+              chest.y = worldCoordsY;
+
+              this.chests.push(chest);
+              this.addChild(chest);
+              chestPityTimer = 0;
+            } else {
+              chestPityTimer++;
+            }
+          }
           tilemap.tile(
             brightness < 0.01 ? "wall" : "floor",
             x * this.worldSize.tileSize,
@@ -440,6 +463,7 @@ export default class Game extends Scene {
     removeIfDestroyed(this.entities);
     removeIfDestroyed(this.enemies);
     removeIfDestroyed(this.projectiles);
+    removeIfDestroyed(this.chests);
 
     for (const projectile of this.projectiles) {
       const availableTargets = this.availableTargets.get(
