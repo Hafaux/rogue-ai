@@ -44,7 +44,7 @@ export const appRouter = t.router({
         narrator: new Narrator(input.theme),
       };
       activePlayers.push(player);
-      console.log(`Activating player ${JSON.stringify(player)}`);
+      console.log(`Activating player ${JSON.stringify(player, null, 2)}`);
     }),
 
   deactivatePlayer: publicProcedure
@@ -71,7 +71,7 @@ export const appRouter = t.router({
     .query((req) => {
       const input = req.input;
       const player = activePlayers.find((p) => p.id === input.playerId);
-      console.log(`Checking player ${JSON.stringify(player)}`);
+      console.log(`Checking player ${JSON.stringify(player, null, 2)}`);
       return JSON.stringify(player);
     }),
 
@@ -84,11 +84,11 @@ export const appRouter = t.router({
     )
     .query(async (req) => {
       const input = req.input;
-      console.log("getNarration called: %s", JSON.stringify(input));
+      console.log("getNarration called: %s", JSON.stringify(input, null, 2));
       const maybe_player: unknown = activePlayers.find(
         (p) => p.id === input.playerId
       );
-      console.log(maybe_player);
+      // console.log(maybe_player);
       if (maybe_player === undefined) {
         throw new Error(
           `getNarration: No such player with id=${input.playerId}`
@@ -99,7 +99,9 @@ export const appRouter = t.router({
       const nextBatch = await player.narrator.nextBatch();
       console.log(
         `Player ${player.id} gets new narration batch: '${JSON.stringify(
-          nextBatch
+          nextBatch,
+          null,
+          2
         )}'`
       );
       return JSON.stringify(nextBatch);

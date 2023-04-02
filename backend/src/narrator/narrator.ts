@@ -32,13 +32,14 @@ import path from "path";
 
 const AUDIO_DIR_PATH = path.join("src", "narrator", "audio");
 
-export const narrationBatchSize: number = 2;
-const narrationFeedSize: number = 10;
+export const narrationBatchSize: number = 3;
+const narrationFeedSize: number = 6;
 
 export interface Narration {
   response: string;
   audio_file: string;
   event: string;
+  details: string;
 }
 
 export interface Voice {
@@ -51,7 +52,7 @@ export class Narrator {
 
   private static narrationMarkers = ["player performs poorly"];
 
-  public static eventTransforms: Map<string, (a: string, b: string) => string>;
+  public static eventTransforms: Map<string, () => string>;
 
   private static narrationsPerPrompt = 3;
 
@@ -106,7 +107,7 @@ ${Narrator.narrationPromptEnd}
 
   async nextBatch(): Promise<Narration[]> {
     console.log("Narrator: producing nextBatch()");
-    if (this.feed.length <= narrationFeedSize / 2) {
+    if (this.feed.length <= narrationFeedSize) {
       console.log("Narrator: prefilling feed");
       await this.prefillFeed();
       console.log("Narrator done prefilling");
@@ -117,24 +118,34 @@ ${Narrator.narrationPromptEnd}
       "Feed was not successfully refilled!"
     );
 
-    const narrationBatch = this.feed.splice(0, narrationBatchSize);
+    let narrationBatch: Narration[] = [];
+    for (const marker of Narrator.eventTransforms.keys()) {
+      const index = this.feed.findIndex((nar) => nar.event === marker);
+      assert(index !== -1);
+      const nar: Narration = this.feed[index];
+      narrationBatch.push(nar);
+      this.feed.splice(index, 1);
+    }
+
     return narrationBatch;
   }
 
   private async history(): Promise<string> {
-    let toLinearize = this.used;
-    let history: string = " Here is the progress so far: ";
+    let used = this.used;
     if (this.used.length == 0) {
-      toLinearize = await this.parseNarrationListing(
+      used = await this.parseNarrationListing(
         JSON.stringify(Narrator.imaginaryNarrations)
       );
-      // Shuffle so that the imaginary history isn't "good, good, ..., good, bad, bad, ... bad".
-      toLinearize.sort(() => Math.random() - 0.5);
-      history = ""; // It hasn't happend, you know.
     }
 
-    for (const u of toLinearize) {
-      history += `*${u.event}*\n${Narrator.narratorName}: "${u.response}"\n`;
+    let history: string = "";
+    for (const u of used) {
+      const contextGen: () => string = Narrator.eventTransforms.get(
+        u.event
+      ) as () => string;
+      u.details = contextGen();
+      // if (!u.details.includes("storeNarration")) context.concat(u.details);
+      history += `*${u.event}.${u.details}*\n${Narrator.narratorName}: "${u.response}"\n`;
     }
     return history;
   }
@@ -142,7 +153,9 @@ ${Narrator.narrationPromptEnd}
   private async parseNarrationListing(_data: any): Promise<Narration[]> {
     const data = JSON.parse(_data);
     let narrations: Narration[] = [];
-    for (const marker of Narrator.narrationMarkers) {
+    for (const marker of Narrator.eventTransforms.keys()) {
+      // console.log(`marker: ${marker}`);
+      // console.log(`data[marker]: ${data[marker]}`);
       for (const narration of data[marker]) {
         const file_path: string = path.join(AUDIO_DIR_PATH, `${uuidv4()}.mp3`);
 
@@ -158,6 +171,7 @@ ${Narrator.narrationPromptEnd}
           event: marker,
           response: narration,
           audio_file: file_path,
+          details: "[fill on storeNarration()]", // Initially empty.
         });
       }
     }
@@ -166,11 +180,13 @@ ${Narrator.narrationPromptEnd}
   }
 
   private async prefillFeed() {
-    const history = this.history();
+    const history = await this.history();
+    console.log(`History: ${history}`);
     const prompt =
       Narrator.narrationPromptBegin + history + Narrator.narrationPromptEnd;
     const answer = await GptController.request(prompt);
     const suggestedNarrations: object = GptController.extractJson(answer);
+    // console.log(suggestedNarrations);
     const newFeed = await this.parseNarrationListing(
       JSON.stringify(suggestedNarrations)
     );
@@ -182,18 +198,18 @@ ${Narrator.narrationPromptEnd}
   get_audio() {}
 }
 
-Narrator.eventTransforms = new Map<string, (a: string, b: string) => string>();
+Narrator.eventTransforms = new Map<string, () => string>();
 
 // a is probably 'enemy' and b will most likely be 'player' or 'enemy'.
-Narrator.eventTransforms.set("hit", (a: string, b: string) => {
-  return `The ${a} got hit by the ${b}`;
+Narrator.eventTransforms.set("hit", () => {
+  return `The player got hit by the enemy.`;
 });
 // a is probably 'player' or 'enemy' (maybe could be 'chest' - "This chest got annihilated!")
 // b could be 'bullet' or 'enemy'
-Narrator.eventTransforms.set("dodge", (a: string, b: string) => {
-  return `the ${a} dodged an attack by the ${b}`;
+Narrator.eventTransforms.set("dodge", () => {
+  return `The enemy dodged an attack by the player`;
 });
 // a is probably 'player' or 'enemy'; b could be 'kill', 'chest'
-Narrator.eventTransforms.set("levelup", (a: string, b: string) => {
-  return `the ${a} levelled up because of the ${b}`;
+Narrator.eventTransforms.set("levelup", () => {
+  return `the player did something ok`;
 });
