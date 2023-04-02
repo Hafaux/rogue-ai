@@ -48,7 +48,7 @@ export default class NarrationSystem implements System {
 
   grabNarration(narrationEvent: string): Narration {
     for (const narration of [...this.narrations]) {
-      if (narration.event == narrationEvent) {
+      if (narration?.event == narrationEvent) {
         trpc.storeNarration
           .query({
             playerId: this.playerId,
