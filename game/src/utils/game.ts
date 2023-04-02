@@ -81,3 +81,7 @@ export function getClosestTarget(
   }
   return newTarget;
 }
+
+export function tryChance(successChance: number) {
+  return Math.random() * 100 + 1 <= successChance;
+}

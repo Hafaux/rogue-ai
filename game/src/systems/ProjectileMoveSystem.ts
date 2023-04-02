@@ -20,11 +20,13 @@ export default class ProjectileMoveSystem implements System {
       //Projectile hit
       if (distance < 20) {
         // entity hit function
-        if (projectile.checkHit()) {
+        if (projectile.checkHit(projectile.target)) {
           projectile.onHit(projectile.target);
-          projectile.destroy();
-          return;
+        } else {
+          // play dodge audio
         }
+        projectile.destroy();
+        return;
       }
     }
 

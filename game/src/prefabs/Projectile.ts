@@ -1,5 +1,6 @@
 import { Container, Graphics } from "pixi.js";
 import Entity from "./Entity";
+import { tryChance } from "../utils/game";
 
 export default class Projectile extends Container {
   sprite: Graphics;
@@ -47,9 +48,9 @@ export default class Projectile extends Container {
     this.addChild(this.sprite);
   }
 
-  checkHit() {
+  checkHit(hitTarget: Entity) {
     // check evasion
-    return true;
+    return !tryChance(hitTarget.dodge);
   }
 
   onHit(hitTarget: Entity) {
