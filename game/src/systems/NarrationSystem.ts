@@ -18,9 +18,10 @@ export default class NarrationSystem implements System {
   }
 
   update(delta: number) {
+    console.log(`NarrationSystem: prefetch size = ${this.narrations.length}`);
     if (this.narrations.length <= 3 && !this.fetching) {
       this.fetchNarrations();
-      console.warn("Narration system: fetching narrations");
+      // console.warn("Narration system: fetching narrations");
     }
 
     // assert(
@@ -57,11 +58,15 @@ export default class NarrationSystem implements System {
           });
 
         // FIXME: Move somewhere
-        new Howl({
-          src: [narration.audio_file],
-          html5: true, // A live stream can only be played through HTML5 Audio.
-          format: ["mp3"],
-        }).play();
+        console.warn(`EXPECT VOICE (maybe)`);
+        if (narration.audio_file?.length) {
+          console.warn(`!! + ${narration.audio_file}`);
+          new Howl({
+            src: [narration.audio_file],
+            html5: true, // A live stream can only be played through HTML5 Audio.
+            format: ["mp3"],
+          }).play();
+        }
 
         return narration;
       }

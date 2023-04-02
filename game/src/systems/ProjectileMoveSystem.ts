@@ -1,11 +1,16 @@
 import { Ticker } from "pixi.js";
 import Projectile from "../prefabs/Projectile";
+import Game from "../scenes/Game";
 import { getEntityDistance } from "../utils/game";
+import NarrationSystem from "./NarrationSystem";
 
 export default class ProjectileMoveSystem implements System {
   timer = 0;
 
-  constructor(private projectiles: Projectile[]) {}
+  constructor(
+    private projectiles: Projectile[],
+    private narrationSystemRef: NarrationSystem
+  ) {}
 
   updateProjectile(delta: number, projectile: Projectile) {
     // projectile dead
@@ -23,7 +28,7 @@ export default class ProjectileMoveSystem implements System {
         if (projectile.checkHit(projectile.target)) {
           projectile.onHit(projectile.target);
         } else {
-          // play dodge audio
+          this.narrationSystemRef.grabNarration("dodge");
         }
         projectile.destroy();
         return;

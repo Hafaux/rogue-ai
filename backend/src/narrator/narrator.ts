@@ -163,7 +163,7 @@ ${Narrator.narrationPromptEnd}
       for (const narration of data[marker]) {
         const file_path: string = path.join(AUDIO_DIR_PATH, `${uuidv4()}.mp3`);
 
-        let base64string: string = "";
+        let b64string: string = "";
         if (audio) {
           const audio_stream = await ElevenLabsController.tts_stream(
             narration,
@@ -174,12 +174,12 @@ ${Narrator.narrationPromptEnd}
 
           audio_stream?.pipe(fs.createWriteStream(file_path));
 
-          const b64string = await new Promise<string>((resolve, reject) => {
+          b64string = await new Promise<string>((resolve, reject) => {
             const chunks: Uint8Array[] = [];
-            audio_stream?.once("data", function (chunk) {
+            audio_stream?.on("data", function (chunk) {
               chunks.push(chunk);
             });
-            audio_stream?.once("end", function () {
+            audio_stream?.on("end", function () {
               var result = Buffer.concat(chunks);
               console.log("final result:", result.length);
               resolve("data:audio/mp3;base64," + result.toString("base64"));
@@ -190,7 +190,7 @@ ${Narrator.narrationPromptEnd}
         narrations.push({
           event: marker,
           response: narration,
-          audio_file: base64string,
+          audio_file: b64string,
           details: "[fill on storeNarration()]", // Initially empty.
         });
       }
@@ -201,7 +201,7 @@ ${Narrator.narrationPromptEnd}
 
   private async prefillFeed() {
     const history = await this.history();
-    console.log(`History: ${history}`);
+    // console.log(`History: ${history}`);
     const prompt =
       Narrator.narrationPromptBegin + history + Narrator.narrationPromptEnd;
     const answer = await GptController.request(prompt);
@@ -215,8 +215,6 @@ ${Narrator.narrationPromptEnd}
       this.feed.push(n);
     }
   }
-
-  get_audio() {}
 }
 
 Narrator.eventTransforms = new Map<string, () => string>();

@@ -395,6 +395,10 @@ export default class Game extends Scene {
         Ticker.shared.add((delta) => {
           this.narrationSystem.update(delta);
         });
+
+        this.addSystem(
+          new ProjectileMoveSystem(this.projectiles, this.narrationSystem)
+        );
       });
 
     this.addSystem(this.playerSystem);
@@ -407,7 +411,6 @@ export default class Game extends Scene {
       )
     );
 
-    this.addSystem(new ProjectileMoveSystem(this.projectiles));
     this.addSystem(new ChestSystem(this.chests, this.player));
 
     Ticker.shared.add((delta) => {
