@@ -16,6 +16,7 @@ import Projectile from "../prefabs/Projectile";
 import { getClosestTarget, removeIfDestroyed, tryChance } from "../utils/game";
 import Chest from "../prefabs/Chest";
 import ChestSystem from "../systems/ChestSystem";
+import { gsap } from "gsap";
 
 export default class Game extends Scene {
   name = "Game";
@@ -66,6 +67,13 @@ export default class Game extends Scene {
   }
 
   async load() {
+    this.alpha = 0;
+    gsap.to(this, {
+      alpha: 1,
+      duration: 0.3,
+      ease: "linear",
+    });
+
     this.spritesheet = new Spritesheet(
       Texture.from("spritesheet"),
       Assets.cache.get("atlasGen")
