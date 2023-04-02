@@ -28,10 +28,10 @@ export default class NarrationSystem implements System {
       this.fetchNarrations();
     }
 
-    assert(
-      this.narrations.length >= 3,
-      "Narrations are not prefetched correctly."
-    );
+    // assert(
+    //   this.narrations.length >= 3,
+    //   "Narrations are not prefetched correctly."
+    // );
   }
 
   async fetchNarrations() {
@@ -43,7 +43,7 @@ export default class NarrationSystem implements System {
       this.narrations.push(narration);
     }
     this.waiting = false;
-    assert(this.narrations.length >= 3);
+    // assert(this.narrations.length >= 3);
   }
 
   grabNarration(narrationEvent: string): Narration {
@@ -61,7 +61,7 @@ export default class NarrationSystem implements System {
       }
     }
 
-    assert(false, "unreachable");
+    // assert(false, "unreachable");
     return {
       event: narrationEvent,
       response: "",

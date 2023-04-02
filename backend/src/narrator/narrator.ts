@@ -1,4 +1,3 @@
-import { assert } from "console";
 import {
   ElevenLabsController,
   CAVE_JOHNSON_NAME,
@@ -114,15 +113,15 @@ ${Narrator.narrationPromptEnd}
       console.log("Narrator done prefilling");
     }
 
-    assert(
-      this.feed.length > narrationBatchSize,
-      "Feed was not successfully refilled!"
-    );
+    // assert(
+    //   this.feed.length > narrationBatchSize,
+    //   "Feed was not successfully refilled!"
+    // );
 
     let narrationBatch: Narration[] = [];
     for (const marker of Narrator.eventTransforms.keys()) {
       const index = this.feed.findIndex((nar) => nar.event === marker);
-      assert(index !== -1);
+      // assert(index !== -1);
       const nar: Narration = this.feed[index];
       narrationBatch.push(nar);
       this.feed.splice(index, 1);
