@@ -256,7 +256,6 @@ export default class Game extends Scene {
       }
 
       console.warn(el.value + el.addAmount, el.label);
-
       // Lord forgive me, for I have absolutely no time left to refactor this before the deadline
       switch (el.label) {
         case "ATK SPD": {
@@ -266,6 +265,26 @@ export default class Game extends Scene {
         }
         case "ATK PWR": {
           this.player.attackPower = el.value + el.addAmount;
+
+          break;
+        }
+        case "CRT CHC": {
+          this.player.critChance = el.value + el.addAmount;
+
+          break;
+        }
+        case "DEF": {
+          this.player.defence = el.value + el.addAmount;
+
+          break;
+        }
+        case "SPD": {
+          this.player.speed = el.value + el.addAmount;
+
+          break;
+        }
+        case "DDG": {
+          this.player.dodge = el.value + el.addAmount;
 
           break;
         }
@@ -294,14 +313,60 @@ export default class Game extends Scene {
       onPointAdd
     );
 
-    attackSpeed.y -= attackPower.height;
-    stats.addChild(attackPower, attackSpeed);
+    const critChance = new StatElement(
+      "CRT CHC",
+      this.player.critChance,
+      {
+        valueColor: 0xbb0000,
+      },
+      1,
+      onPointAdd
+    );
+
+    const defence = new StatElement(
+      "DEF",
+      this.player.defence,
+      {
+        valueColor: 0xbb0000,
+      },
+      5,
+      onPointAdd
+    );
+
+    const speed = new StatElement(
+      "SPD",
+      this.player.speed,
+      {
+        valueColor: 0xbb0000,
+      },
+      1,
+      onPointAdd
+    );
+
+    const dodge = new StatElement(
+      "DDG",
+      this.player.speed,
+      {
+        valueColor: 0xbb0000,
+      },
+      1,
+      onPointAdd
+    );
+    // have to hardcode them :(
+    attackSpeed.y -= attackPower.height * 2;
+    critChance.y -= attackPower.height;
+
+    defence.y -= attackPower.height * 2;
+    speed.y -= speed.height;
+
+    dodge.x -= attackPower.width;
+    speed.x -= attackPower.width;
+    defence.x -= attackPower.width;
+    stats.addChild(speed, critChance, dodge, attackPower, attackSpeed, defence);
 
     stats.scale.set(0.9);
 
-    const padding = 20;
-
-    stats.x = this.utils.viewport.screenWidth - stats.width - padding;
+    stats.x = this.utils.viewport.screenWidth - 300;
     stats.y = this.utils.viewport.screenHeight - stats.height;
 
     this.uiContainer.addChild(stats);
