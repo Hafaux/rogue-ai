@@ -148,6 +148,16 @@ export default class Game extends Scene {
     enemy.x = x;
     enemy.y = y;
 
+    enemy.scale.set(0);
+
+    gsap.to(enemy, {
+      pixi: {
+        scale: 1,
+      },
+      ease: "elastic.out(1.5)",
+      duration: 1,
+    });
+
     this.enemies.push(enemy);
     this.addEntity(enemy);
   }

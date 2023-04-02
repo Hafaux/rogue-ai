@@ -19,6 +19,7 @@
     "vite": "^4.0.4"
   },
   "dependencies": {
+    "@pixi/filter-outline": "^5.2.0",
     "@pixi/sound": "^5.0.0",
     "@pixi/tilemap": "^4.0.0",
     "@pixi/ui": "^0.7.0",

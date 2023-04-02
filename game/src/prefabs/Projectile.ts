@@ -1,11 +1,12 @@
 import { Container, Graphics } from "pixi.js";
 import Entity from "./Entity";
 import { tryChance } from "../utils/game";
+import { OutlineFilter } from "@pixi/filter-outline";
 
 export default class Projectile extends Container {
   sprite: Graphics;
   life = 1;
-  speed = 5;
+  speed = 8;
   creatorStats: {
     projectileLifespan: number;
     attackPower: number;
@@ -30,6 +31,8 @@ export default class Projectile extends Container {
     }
   ) {
     super();
+
+    const outlineFilter = new OutlineFilter(5);
     //
     // this.data = {
     //   ...this.data,
@@ -42,6 +45,8 @@ export default class Projectile extends Container {
     }
 
     this.sprite = new Graphics();
+
+    this.filters = [outlineFilter];
 
     this.position.set(x, y);
 
