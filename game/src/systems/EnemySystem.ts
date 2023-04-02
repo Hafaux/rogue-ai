@@ -46,8 +46,23 @@ export default class EnemySystem implements System {
   playerCollision(enemy: Enemy, delta: number) {
     this.setTileCoords(enemy);
 
+    const {
+      distance,
+      vec: vecPlayer,
+      angle: angleToPlayer,
+    } = getEntityDirection(this.playerRef, enemy);
+
+    if (distance < 70) {
+      this.playerRef.applyDamage(enemy.attackPower);
+
+      return;
+    }
+
     if (enemy.pathToTarget.length <= 1) {
-      // something else
+      enemy.rotation = angleToPlayer;
+
+      enemy.x -= vecPlayer.x * enemy.speed * delta;
+      enemy.y -= vecPlayer.y * enemy.speed * delta;
 
       return;
     }
@@ -64,10 +79,12 @@ export default class EnemySystem implements System {
       y: enemy.y,
     });
 
-    enemy.x -= vec.x * enemy.speed * delta;
-    enemy.y -= vec.y * enemy.speed * delta;
+    // console.warn(distance);
 
     enemy.rotation = angle;
+
+    enemy.x -= vec.x * enemy.speed * delta;
+    enemy.y -= vec.y * enemy.speed * delta;
   }
 
   setTileCoords(enemy: Entity) {
@@ -95,7 +112,7 @@ export default class EnemySystem implements System {
     for (const otherEnemy of otherEnemies) {
       const { vec, distance } = getEntityDirection(otherEnemy, enemy);
 
-      if (distance < otherEnemy.size * 2) {
+      if (distance < otherEnemy.size) {
         enemy.x += vec.x * enemy.speed * delta;
         enemy.y += vec.y * enemy.speed * delta;
       }

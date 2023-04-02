@@ -245,14 +245,16 @@ export default class Loading extends Scene {
 
       response = await trpc.generateAssets.query({
         playerId: "1",
-        theme: "forest",
+        theme: "neon wireframe",
       });
-    } catch {
+
+      console.warn("API RESPONSE", response);
+    } catch (e) {
       // In case of server
+      console.warn(e);
+
       response = responses[0];
     }
-
-    // console.warn(assets);
 
     Assets.add("spritesheet", "data:image/png;base64," + response.image);
 

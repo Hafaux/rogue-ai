@@ -9,6 +9,10 @@ export default class Player extends Entity {
     y: number;
   };
 
+  skillPoints = 0;
+
+  mapIndex = 0;
+
   constructor(public hp = 100) {
     super();
     this.type = "Player";
@@ -18,6 +22,8 @@ export default class Player extends Entity {
     this.attackPower = 100;
     this.speed = 10;
     this.size = 30;
+
+    this.iframes = 0.4;
 
     this.velocity = {
       x: 0,

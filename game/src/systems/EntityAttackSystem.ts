@@ -18,7 +18,7 @@ export default class EntityAttackSystem implements System {
     for (const entity of [...this.entities]) {
       if (
         entity.canAttack &&
-        this.timer > entity.attackSpeed + entity.lastAttackTime
+        this.timer > 1 / entity.attackSpeed + entity.lastAttackTime
       ) {
         const availableTargets = this.availableTargets.get(entity.type);
         if (availableTargets) {
