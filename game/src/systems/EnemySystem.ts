@@ -56,20 +56,20 @@ export default class EnemySystem implements System {
       return;
     }
 
-    if (distance > 1000 && enemy.filters?.length) {
+    if (distance > 1000 && enemy.spriteContainer.filters?.length) {
       enemy.filters = [];
 
       return;
     }
 
-    if (!enemy.filters?.length) {
-      enemy.filters = [enemy.outlineFilter];
+    if (!enemy.spriteContainer.filters?.length) {
+      enemy.spriteContainer.filters = [enemy.outlineFilter];
     }
 
     this.setTileCoords(enemy);
 
     if (enemy.pathToTarget.length <= 1) {
-      enemy.rotation = angleToPlayer;
+      enemy.spriteContainer.rotation = angleToPlayer;
 
       enemy.x -= vecPlayer.x * enemy.speed * delta;
       enemy.y -= vecPlayer.y * enemy.speed * delta;
@@ -91,7 +91,7 @@ export default class EnemySystem implements System {
 
     // console.warn(distance);
 
-    enemy.rotation = angle;
+    enemy.spriteContainer.rotation = angle;
 
     enemy.x -= vec.x * enemy.speed * delta;
     enemy.y -= vec.y * enemy.speed * delta;

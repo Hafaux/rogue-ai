@@ -65,27 +65,50 @@ export default class Entity extends Container {
   colorFilter: ColorMatrixFilter;
   outlineFilter: OutlineFilter;
 
+  spriteContainer: Container;
+  hpBar!: Graphics;
+
   constructor() {
     super();
 
     this.colorFilter = new ColorMatrixFilter();
     this.outlineFilter = new OutlineFilter(5);
 
+    this.spriteContainer = new Container();
+
     this.addHpBar();
 
-    this.filters = [this.outlineFilter, this.colorFilter];
+    this.spriteContainer.filters = [this.outlineFilter, this.colorFilter];
+
+    this.addChild(this.spriteContainer);
   }
 
   addHpBar() {
-    const hpBar = new Graphics();
-
-    hpBar.beginFill(0xff0000);
-
     const hpBarSize = this.size * 2;
-    hpBar.drawRect(-hpBarSize / 2, -this.size + 5, this.size * 2, 5);
-    hpBar.endFill();
 
-    this.addChild(hpBar);
+    this.hpBar = new Graphics();
+
+    this.hpBar.beginFill(0xff0000);
+    this.hpBar.drawRect(-hpBarSize / 2, -this.size + 5, this.size * 2, 10);
+    this.hpBar.endFill();
+
+    const hpBar2 = new Graphics();
+
+    hpBar2.beginFill(0xbebebe);
+    hpBar2.drawRect(-hpBarSize / 2 - 3, -this.size + 3, this.size * 2 + 6, 14);
+
+    hpBar2.endFill();
+
+    this.addChild(hpBar2, this.hpBar);
+  }
+
+  setHp(value: number) {
+    gsap.to(this.hpBar.scale, {
+      x: value / 100,
+      duration: 0.2,
+    });
+
+    this.hp = value;
   }
 
   async applyDamage(damage: number) {
@@ -96,7 +119,8 @@ export default class Entity extends Container {
         this.colorFilter.reset();
       });
 
-      this.hp -= damage;
+      this.setHp(this.hp - damage);
+
       this.emit("CHANGE_HP" as any, this.hp);
       if (this.hp <= 0) {
         await gsap.to(this, {

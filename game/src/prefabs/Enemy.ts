@@ -21,6 +21,8 @@ export default class Enemy extends Entity {
     this.sprite.drawRect(-this.size / 2, -this.size / 2, this.size, this.size);
     this.sprite.endFill();
 
-    this.addChild(this.sprite);
+    this.sprite.cacheAsBitmap = true;
+
+    this.spriteContainer.addChild(this.sprite);
   }
 }

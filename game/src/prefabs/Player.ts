@@ -53,4 +53,23 @@ export default class Player extends Entity {
 
     return result;
   }
+
+  addHpBar() {
+    const hpBarSize = this.size * 4;
+
+    this.hpBar = new Graphics();
+
+    this.hpBar.beginFill(0xff0000);
+    this.hpBar.drawRect(-hpBarSize / 2, -this.size + 5, hpBarSize, 10);
+    this.hpBar.endFill();
+
+    const hpBar2 = new Graphics();
+
+    hpBar2.beginFill(0xbebe);
+    hpBar2.drawRect(-hpBarSize / 2 - 1, -this.size + 3, hpBarSize + 2, 14);
+
+    hpBar2.endFill();
+
+    this.addChild(hpBar2, this.hpBar);
+  }
 }
