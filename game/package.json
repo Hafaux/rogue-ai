@@ -9,6 +9,7 @@
     "lint": "eslint ./src --fix"
   },
   "devDependencies": {
+    "@types/howler": "^2.2.7",
     "@typescript-eslint/eslint-plugin": "^5.49.0",
     "@typescript-eslint/parser": "^5.49.0",
     "eslint": "^8.32.0",
@@ -22,9 +23,10 @@
     "@pixi/sound": "^5.0.0",
     "@pixi/tilemap": "^4.0.0",
     "@trpc/client": "^10.18.0",
-    "esbuild": "^0.17.14",
     "astar-typescript": "^1.2.6",
+    "esbuild": "^0.17.14",
     "gsap": "^3.11.4",
+    "howler": "^2.2.3",
     "pixi-viewport": "^5.0.1",
     "pixi.js": "^7.1.1",
     "wavefunctioncollapse": "^2.1.0"

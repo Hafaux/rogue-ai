@@ -14,6 +14,8 @@ import Enemy from "../prefabs/Enemy";
 import Entity from "../prefabs/Entity";
 import Projectile from "../prefabs/Projectile";
 import { getClosestTarget, removeIfDestroyed } from "../utils/game";
+import trpc, { TRPC_URL } from "../core/trpc";
+import { Howl, Howler } from "howler";
 
 export default class Game extends Scene {
   name = "Game";
@@ -32,10 +34,10 @@ export default class Game extends Scene {
   spritesheet!: Spritesheet;
 
   async testTsEndpoints() {
-    // await trpc.activatePlayer.query({
-    //   playerId: "0",
-    //   theme: "space dystopia",
-    // });
+    await trpc.activatePlayer.query({
+      playerId: "0",
+      theme: "space dystopia",
+    });
 
     // await trpc.checkPlayer.query({
     //   playerId: "0",
@@ -49,9 +51,17 @@ export default class Game extends Scene {
     //   playerId: "0",
     // });
 
-    // await trpc.getNarration.query({
-    //   playerId: "0",
-    // });
+    const narations = JSON.parse(
+      await trpc.getNarration.query({
+        playerId: "0",
+      })
+    );
+
+    console.log(narations[0].audio_file);
+
+    new Howl({
+      src: TRPC_URL + narations[0].audio_file,
+    }).play();
 
     // await trpc.storeNarration.query({
     //   playerId: "0",
@@ -61,6 +71,8 @@ export default class Game extends Scene {
   }
 
   async load() {
+    this.testTsEndpoints();
+
     this.spritesheet = new Spritesheet(
       Texture.from("spritesheet"),
       Assets.cache.get("atlasGen")

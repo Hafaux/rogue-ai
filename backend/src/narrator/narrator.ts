@@ -7,8 +7,8 @@ import {
 import { GptController } from "../api/gpt_controller";
 import * as imaginaryNarrationsIncluded from "./imaginary.json";
 import { v4 as uuidv4 } from "uuid";
-import fs from "fs";
 import path from "path";
+import concat from "concat-stream";
 
 // Spec :D
 // -------
@@ -127,14 +127,17 @@ export class Narrator {
           narration,
           this.voice.id
         );
+        audio_stream;
 
-        audio_stream?.pipe(fs.createWriteStream(file_path));
-        console.log("File saved successfully: ", file_path);
+        console.log("---------------------------------------_");
+
+        const a = audio_stream?.read();
+        console.log("File saved successfully: ", a, audio_stream);
 
         narrations.push({
           event: marker,
           response: narration,
-          audio_file: file_path,
+          audio_file: "a",
         });
       }
     }
