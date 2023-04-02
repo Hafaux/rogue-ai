@@ -3,7 +3,7 @@ import Entity from "./Entity";
 
 export default class Projectile extends Container {
   sprite: Graphics;
-  life = 0;
+  life = 1;
   speed = 5;
   creatorStats: {
     projectileLifespan: number;
