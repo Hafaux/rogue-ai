@@ -46,7 +46,7 @@ export default class Player extends Entity {
     this.sprite.drawCircle(0, 0, this.size);
     this.sprite.endFill();
 
-    this.addChild(this.sprite);
+    this.spriteContainer.addChild(this.sprite);
   }
   applyDamage(damage: number) {
     const result = super.applyDamage(damage);
