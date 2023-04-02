@@ -1,6 +1,7 @@
-import { Container } from "pixi.js";
+import { Container, ColorMatrixFilter } from "pixi.js";
 import { getClosestTarget, getEntityDirection } from "../utils/game";
 import Projectile from "./Projectile";
+import { wait } from "../utils/misc";
 
 export default class Entity extends Container {
   type = "";
@@ -58,12 +59,24 @@ export default class Entity extends Container {
     },
   };
 
+  filter: ColorMatrixFilter;
+
   constructor() {
     super();
+
+    this.filter = new ColorMatrixFilter();
+
+    this.filters = [this.filter];
   }
 
   applyDamage(damage: number) {
     if (!this.iframeActive) {
+      this.filter.sepia(true);
+
+      wait(0.2).then(() => {
+        this.filter.reset();
+      });
+
       this.hp -= damage;
       this.emit("CHANGE_HP" as any, this.hp);
       if (this.hp <= 0) {
@@ -90,10 +103,9 @@ export default class Entity extends Container {
     projectile.angle = angle;
     return projectile;
   }
+
   increaseXp(xpAmountIncrease: number) {
     this.xp += xpAmountIncrease;
     this.emit("CHANGE_XP" as any, this.xp);
-
-    // level up
   }
 }

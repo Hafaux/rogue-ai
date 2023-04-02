@@ -31,6 +31,8 @@ export default class Game extends Scene {
   collisionMatrix!: CollisionMatrix;
   spritesheet!: Spritesheet;
 
+  windowFocused = true;
+
   async testTsEndpoints() {
     // await trpc.activatePlayer.query({
     //   playerId: "0",
@@ -66,6 +68,8 @@ export default class Game extends Scene {
       Assets.cache.get("atlasGen")
     );
 
+    this.windowFocused = true;
+
     this.spritesheet.parse();
 
     this.worldSize = {
@@ -93,10 +97,16 @@ export default class Game extends Scene {
     this.initUi();
 
     this.initSystems(this.collisionMatrix);
-
     this.addEntity(this.player);
-
     this.spawnEnemies(this.collisionMatrix);
+
+    window.onblur = () => {
+      this.windowFocused = false;
+    };
+
+    window.onfocus = () => {
+      this.windowFocused = true;
+    };
   }
 
   addEntity(entity: Entity) {
@@ -138,7 +148,7 @@ export default class Game extends Scene {
 
   initUi() {
     const hp = new StatElement("HP", 100, {
-      alpha: 0.7,
+      alpha: 0.8,
     });
 
     this.player.on("CHANGE_HP" as any, (newHp: number) => {
@@ -146,16 +156,117 @@ export default class Game extends Scene {
     });
 
     const xp = new StatElement("XP", 0, {
-      alpha: 0.7,
+      alpha: 0.8,
       valueColor: 0x8888ff,
     });
 
-    this.player.on("CHANGE_XP" as any, (newXp: number) => {
-      xp.update(newXp);
+    const level = new StatElement("LEVEL", 1, {
+      valueColor: 0xff00ff,
     });
 
+    const stats = new Container();
+
+    const skillPointText = new StatElement("SKILL POINTS", 0, {
+      labelColor: 0xff00ff,
+      valueColor: 0xffff00,
+    });
+
+    stats.addChild(skillPointText);
+
+    // const statsMap = {
+
+    // }
+
+    skillPointText.visible = false;
+
+    skillPointText.y -= 200;
+    skillPointText.x -= 110;
+
+    this.player.on("CHANGE_XP" as any, () => {
+      const newXp = ++xp.value;
+
+      if (newXp >= 5) {
+        level.update(++level.value);
+        this.player.skillPoints++;
+
+        skillPointText.update(this.player.skillPoints);
+
+        skillPointText.visible = true;
+
+        xp.update(0);
+      } else {
+        xp.update(newXp);
+      }
+    });
+
+    level.scale.set(1.5);
+
+    level.x = window.innerWidth / 2 - level.width / 2;
+
     xp.y = hp.height;
-    this.uiContainer.addChild(hp, xp);
+    this.uiContainer.addChild(hp, xp, level);
+
+    const onPointAdd = (el: StatElement) => {
+      if (!this.player.skillPoints) return false;
+
+      this.player.skillPoints--;
+
+      skillPointText.update(this.player.skillPoints);
+
+      if (!this.player.skillPoints) {
+        skillPointText.visible = true;
+      }
+
+      console.warn(el.value + el.addAmount, el.label);
+
+      // Lord forgive me, for I have absolutely no time left to refactor this before the deadline
+      switch (el.label) {
+        case "ATK SPD": {
+          this.player.attackSpeed = el.value + el.addAmount;
+
+          break;
+        }
+        case "ATK PWR": {
+          this.player.attackPower = el.value + el.addAmount;
+
+          break;
+        }
+      }
+
+      return true;
+    };
+
+    const attackPower = new StatElement(
+      "ATK PWR",
+      this.player.attackPower,
+      {
+        valueColor: 0xbb0000,
+      },
+      10,
+      onPointAdd
+    );
+
+    const attackSpeed = new StatElement(
+      "ATK SPD",
+      this.player.attackSpeed,
+      {
+        valueColor: 0xbb0000,
+      },
+      0.5,
+      onPointAdd
+    );
+
+    attackSpeed.y -= attackPower.height;
+    stats.addChild(attackPower, attackSpeed);
+
+    stats.scale.set(0.9);
+
+    const padding = 20;
+
+    stats.x = this.utils.viewport.screenWidth - stats.width - padding;
+    stats.y = this.utils.viewport.screenHeight - stats.height;
+
+    this.uiContainer.addChild(stats);
   }
 
   initSystems(collisionMatrix: CollisionMatrix) {
@@ -182,6 +293,7 @@ export default class Game extends Scene {
         this.availableTargets
       )
     );
+
     this.addSystem(new ProjectileMoveSystem(this.projectiles));
 
     Ticker.shared.add((delta) => {
@@ -256,10 +368,12 @@ export default class Game extends Scene {
   }
 
   spawnEnemies(collisionMatrix: CollisionMatrix) {
-    const secondsPerWave = 4;
+    const secondsPerWave = 2;
     const enemiesAmount = 4;
 
     setInterval(() => {
+      if (this.enemies.length > 40) return;
+
       const { current } = this.player.tileCoords;
 
       for (let i = 0; i < enemiesAmount; i++) {

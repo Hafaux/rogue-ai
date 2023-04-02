@@ -13,20 +13,31 @@ interface Config {
 
 export default class StatElement extends Container {
   valueText: Text;
-  label: Text;
+  labelText: Text;
 
   constructor(
-    label: string,
+    public label: string,
     public value: number,
-    public config: Partial<Config> = {}
+    public config: Partial<Config> = {},
+    public addAmount = 0,
+    public onUpdate?: (el: StatElement) => void
   ) {
     super();
 
-    this.label = this.createTextElement(label + ":", {
+    this.cursor = "pointer";
+
+    this.labelText = createTextElement(label + ":", {
       fill: this.config.labelColor ?? 0xffffff,
     });
-    this.valueText = this.createTextElement(this.getValueStr(value), {
+    this.valueText = createTextElement(this.getValueStr(value), {
       fill: this.config.valueColor ?? 0xffff00,
+    });
+
+    this.interactive = true;
+    this.on("click", () => {
+      if (!this.addAmount) return;
+
+      if (onUpdate?.(this)) this.update(this.value + this.addAmount);
     });
 
     console.warn(this.config);
@@ -34,11 +45,11 @@ export default class StatElement extends Container {
     this.x = this.config.padding?.x || 10;
     this.y = this.config.padding?.y || 0;
 
-    this.valueText.x = this.label.width + 10;
+    this.valueText.x = this.labelText.width + 10;
 
     this.alpha = this.config.alpha || 1;
 
-    this.addChild(this.label, this.valueText);
+    this.addChild(this.labelText, this.valueText);
   }
 
   getValueStr(value: number) {
@@ -49,16 +60,20 @@ export default class StatElement extends Container {
 
   update(newValue: number) {
     this.valueText.text = this.getValueStr(newValue);
+    this.value = newValue;
   }
-
-  createTextElement = (text: string, textStyle: Partial<TextStyle> = {}) => {
-    const defaultStyle = {
-      fontFamily: "upheavtt",
-      fontSize: 50,
-      fill: 0xffffff,
-      dropShadow: true,
-    };
-
-    return new Text(text, { ...defaultStyle, ...textStyle });
-  };
 }
+
+export const createTextElement = (
+  text: string,
+  textStyle: Partial<TextStyle> = {}
+) => {
+  const defaultStyle = {
+    fontFamily: "upheavtt",
+    fontSize: 50,
+    fill: 0xffffff,
+    dropShadow: true,
+  };
+
+  return new Text(text, { ...defaultStyle, ...textStyle });
+};
