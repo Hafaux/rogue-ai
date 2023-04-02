@@ -8,8 +8,9 @@ import { GptController } from "../api/gpt_controller";
 import * as imaginaryNarrationsIncluded from "./imaginary.json";
 import * as voicesIncluded from "./voices.json";
 import { v4 as uuidv4 } from "uuid";
-import fs from "fs";
 import path from "path";
+import concat from "concat-stream";
+import fs from "fs";
 
 // Spec :D
 // -------
@@ -164,13 +165,26 @@ ${Narrator.narrationPromptEnd}
           this.voice.id
         );
 
-        audio_stream?.pipe(fs.createWriteStream(file_path));
-        console.log("File saved successfully: ", file_path);
+        console.log("---------------------------------------_");
+
+        // audio_stream?.pipe(fs.createWriteStream(file_path));
+
+        const b64string = await new Promise<string>((resolve, reject) => {
+          const chunks: Uint8Array[] = [];
+          audio_stream?.on("data", function (chunk) {
+            chunks.push(chunk);
+          });
+          audio_stream?.on("end", function () {
+            var result = Buffer.concat(chunks);
+            console.log("final result:", result.length);
+            resolve("data:audio/mp3;base64," + result.toString("base64"));
+          });
+        });
 
         narrations.push({
           event: marker,
           response: narration,
-          audio_file: file_path,
+          audio_file: b64string,
           details: "[fill on storeNarration()]", // Initially empty.
         });
       }

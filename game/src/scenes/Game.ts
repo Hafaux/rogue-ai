@@ -17,6 +17,8 @@ import { getClosestTarget, removeIfDestroyed, tryChance } from "../utils/game";
 import Chest from "../prefabs/Chest";
 import ChestSystem from "../systems/ChestSystem";
 import { gsap } from "gsap";
+import trpc, { TRPC_URL } from "../core/trpc";
+import { Howl, Howler } from "howler";
 
 export default class Game extends Scene {
   name = "Game";
@@ -38,10 +40,10 @@ export default class Game extends Scene {
   windowFocused = true;
 
   async testTsEndpoints() {
-    // await trpc.activatePlayer.query({
-    //   playerId: "0",
-    //   theme: "space dystopia",
-    // });
+    await trpc.activatePlayer.query({
+      playerId: "0",
+      theme: "space dystopia",
+    });
 
     // await trpc.checkPlayer.query({
     //   playerId: "0",
@@ -55,9 +57,19 @@ export default class Game extends Scene {
     //   playerId: "0",
     // });
 
-    // await trpc.getNarration.query({
-    //   playerId: "0",
-    // });
+    const narations = JSON.parse(
+      await trpc.getNarration.query({
+        playerId: "0",
+      })
+    );
+
+    console.log(narations[0].audio_file);
+
+    new Howl({
+      src: [narations[0].audio_file],
+      html5: true, // A live stream can only be played through HTML5 Audio.
+      format: ["mp3"],
+    }).play();
 
     // await trpc.storeNarration.query({
     //   playerId: "0",
@@ -73,6 +85,7 @@ export default class Game extends Scene {
       duration: 0.3,
       ease: "linear",
     });
+    this.testTsEndpoints();
 
     this.spritesheet = new Spritesheet(
       Texture.from("spritesheet"),
