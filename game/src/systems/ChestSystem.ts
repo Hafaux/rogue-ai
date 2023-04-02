@@ -7,6 +7,7 @@ export default class ChestSystem implements System {
   constructor(private chests: Chest[], private playerRef: Player) {}
   async update(delta: number) {
     for (const chest of [...this.chests]) {
+      if (chest.claimed) continue;
       const distance = getEntityDistance(chest, this.playerRef);
 
       if (distance > 1000 && chest.filters?.length) {
@@ -18,6 +19,7 @@ export default class ChestSystem implements System {
       //Projectile hit
       if (distance < 70) {
         this.playerRef.increaseXp(chest.reward);
+        chest.claimed = true;
 
         await gsap.to(chest, {
           pixi: {

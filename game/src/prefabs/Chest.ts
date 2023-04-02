@@ -3,8 +3,9 @@ import { Container, Sprite, Texture } from "pixi.js";
 
 export default class Chest extends Container {
   sprite!: Sprite;
-  reward = 1;
+  reward = 5;
   outlineFilter: OutlineFilter;
+  claimed = false;
 
   constructor(public texture: Texture) {
     super();
