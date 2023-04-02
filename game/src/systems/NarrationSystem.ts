@@ -12,6 +12,10 @@ export default class NarrationSystem implements System {
   fetching: boolean;
   playing: boolean;
 
+  cooldown = false;
+
+  currentSound: Howl | null = null;
+
   constructor(playerId: string) {
     console.log("Constructing NarrationSystem");
     this.playerId = playerId;
@@ -20,7 +24,7 @@ export default class NarrationSystem implements System {
   }
 
   update(delta: number) {
-    console.log(`NarrationSystem: prefetch size = ${this.narrations.length}`);
+    // console.log(`NarrationSystem: prefetch size = ${this.narrations.length}`);
     if (this.narrations.length <= 3 && !this.fetching) {
       this.fetchNarrations();
       // console.warn("Narration system: fetching narrations");
@@ -46,32 +50,36 @@ export default class NarrationSystem implements System {
     // assert(this.narrations.length >= 3);
   }
 
-  grabNarration(narrationEvent: string): Narration {
+  grabNarration(narrationEvent: string) {
+    if (this.currentSound?.playing) return null;
+
     for (const narration of [...this.narrations]) {
+      console.warn(narration);
+
       if (narration.event == narrationEvent) {
-        trpc.storeNarration
-          .query({
-            playerId: this.playerId,
-            narrationSerial: JSON.stringify(narration),
-          })
-          .then(() => {
-            this.narrations.splice(this.narrations.indexOf(narration), 1);
-          });
+        this.narrations.splice(this.narrations.indexOf(narration), 1);
+
+        // trpc.storeNarration
+        //   .query({
+        //     playerId: this.playerId,
+        //     narrationSerial: JSON.stringify(narration),
+        //   })
+        //   .then(() => {
+        //     this.narrations.splice(this.narrations.indexOf(narration), 1);
+        //   });
 
         // FIXME: Move somewhere
-        console.warn(`EXPECT VOICE (maybe)`);
-        if (narration.audio_file?.length && !this.playing) {
+        console.warn("EXPECT VOICE (maybe)", this.currentSound, narration);
+        if (narration.audio_file?.length) {
           this.playing = true;
-          new Howl({
+          this.currentSound = new Howl({
             src: [narration.audio_file],
             html5: true, // A live stream can only be played through HTML5 Audio.
             format: ["mp3"],
-          }).play();
-        }
+          });
 
-        setTimeout(() => {
-          this.playing = false;
-        }, 5000);
+          this.currentSound.play();
+        }
 
         return narration;
       }

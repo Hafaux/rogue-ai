@@ -28,7 +28,11 @@ export default class ProjectileMoveSystem implements System {
         if (projectile.checkHit(projectile.target)) {
           projectile.onHit(projectile.target);
         } else {
-          this.narrationSystemRef.grabNarration("dodge");
+          try {
+            this.narrationSystemRef.grabNarration("dodge");
+          } catch (e) {
+            console.warn("failed to grab narration", e);
+          }
         }
         projectile.destroy();
         return;
