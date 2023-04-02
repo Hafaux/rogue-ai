@@ -3,6 +3,8 @@ import { getClosestTarget, getEntityDirection } from "../utils/game";
 import Projectile from "./Projectile";
 import { wait } from "../utils/misc";
 
+import { OutlineFilter } from "@pixi/filter-outline";
+
 export default class Entity extends Container {
   type = "";
   target?: Entity;
@@ -59,22 +61,23 @@ export default class Entity extends Container {
     },
   };
 
-  filter: ColorMatrixFilter;
+  colorFilter: ColorMatrixFilter;
 
   constructor() {
     super();
 
-    this.filter = new ColorMatrixFilter();
+    this.colorFilter = new ColorMatrixFilter();
+    const outlineFilter = new OutlineFilter(5);
 
-    this.filters = [this.filter];
+    this.filters = [outlineFilter, this.colorFilter];
   }
 
   applyDamage(damage: number) {
     if (!this.iframeActive) {
-      this.filter.sepia(true);
+      this.colorFilter.negative(true);
 
-      wait(0.2).then(() => {
-        this.filter.reset();
+      wait(0.1).then(() => {
+        this.colorFilter.reset();
       });
 
       this.hp -= damage;

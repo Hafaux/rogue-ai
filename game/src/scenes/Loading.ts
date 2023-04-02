@@ -1,27 +1,54 @@
-import { Assets, Sprite, Text } from "pixi.js";
+import { Assets, Sprite } from "pixi.js";
 import Scene from "../core/Scene";
-import { centerObjects } from "../utils/misc";
+import { centerObjects, wait } from "../utils/misc";
 import trpc from "../core/trpc";
+import { createTextElement } from "../ui/StatElement";
+import gsap from "gsap";
+import { prompt } from "./StartMenu";
 
 export default class Loading extends Scene {
   name = "Loading";
+  loop!: gsap.core.Tween;
 
   async load() {
+    this.alpha = 0;
+
+    gsap.to(this, {
+      alpha: 1,
+      duration: 0.5,
+    });
+
     await this.utils.assetLoader.loadAssetsGroup("Loading");
 
-    const bg = Sprite.from("bgNight");
+    const bg = Sprite.from("loading");
 
-    const text = new Text("Loading...", {
-      fontFamily: "Verdana",
-      fontSize: 50,
-      fill: "white",
+    const promptText = createTextElement(
+      `PROMPT: ${prompt.value || "RANDOM"}`,
+      {
+        fontSize: 70,
+        fill: 0xfefe00,
+      }
+    );
+
+    const text = createTextElement("GENERATING WORLD", {
+      fontSize: 100,
     });
 
     text.resolution = 2;
 
-    centerObjects(bg, text);
+    this.loop = gsap.to(text, {
+      rotation: Math.PI * 2,
+      ease: "back.inOut",
+      duration: 1,
+      repeatDelay: 0.5,
+      repeat: -1,
+    });
 
-    this.addChild(bg, text);
+    centerObjects(bg, text, promptText);
+
+    promptText.y -= 200;
+
+    this.addChild(bg, text, promptText);
   }
 
   async start() {
@@ -240,6 +267,8 @@ export default class Loading extends Scene {
 
     let response;
 
+    console.warn(prompt.value);
+
     try {
       throw null;
 
@@ -251,6 +280,8 @@ export default class Loading extends Scene {
       console.warn("API RESPONSE", response);
     } catch (e) {
       // In case of server
+      // await wait(4);
+
       console.warn(e);
 
       response = responses[0];
@@ -263,5 +294,13 @@ export default class Loading extends Scene {
     Assets.cache.set("atlasGen", response.atlas);
 
     await this.utils.assetLoader.loadAssetsGroup("Game");
+
+    await gsap.to(this, {
+      alpha: 0,
+      ease: "linear",
+      duration: 0.3,
+    });
+
+    this.loop.kill();
   }
 }
