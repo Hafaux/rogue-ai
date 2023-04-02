@@ -139,6 +139,8 @@ export default class AssetGenerator {
 
     await Promise.all(promises);
 
+    await new Promise((res) => setTimeout(res, 1000));
+
     return await this.texturePacker.pack();
   }
 }
