@@ -1,20 +1,41 @@
 {
   "hit": [
-    "You swing your weapon, but the enemies dance circles around you. It's like they're playing with you.",
-    "You're like a clumsy child swinging a toy around. The enemies dodge effortlessly.",
-    "You're trying so hard to hit the enemies, but they're just too fast and agile for you. It's embarrassing.",
-    "It's like you're swinging at thin air. The enemies are just too quick for you."
+    "You can't seem to avoid those bullets, can you? Maybe you should try dodging once in a while.",
+    "It's like you're just standing there waiting to get hit. You need to move around more if you want to survive.",
+    "Another hit? You're really making this easy for your opponents.",
+    "You're not looking too good there, buddy. Maybe you should retreat and come back when you're stronger.",
+    "If you keep getting hit like that, you're not going to last long. You need to start dodging those bullets.",
+    "Nice try, but you're not quick enough to dodge those bullets. You need to work on your reflexes.",
+    "You might want to try dodging instead of just standing there like a statue. It's called a 'rogue-like' game for a reason.",
+    "Dodging is key in this game, and you're just not doing it. You need to be more agile if you want to survive.",
+    "Dodging isn't your strong suit, is it? Maybe stick to running away.",
+    "You really must like bullets, ha?",
+    "Wow! You got hit twice. That's pretty bad!",
+    "You can't seem to avoid those bullets, can you? Maybe you should try dodging once in a while.",
+    "It's like you're just standing there waiting to get hit. You need to move around more if you want to survive.",
+    "Another hit? You're really making this easy for the other guys, huh?",
+    "You might want to try dodging instead of just standing there like a statue. It's called a 'rogue-like' game for a reason.",
+    "Dodging is key in this game, and you're just not doing it. You need to be more agile if you want to survive."
   ],
   "levelup": [
-    "You stumble upon a chest, but don't get too excited. It's probably just filled with sand.",
-    "You found a chest! Too bad the enemies are just going to take it back once they defeat you.",
-    "A chest appears before you, but you know deep down that you don't stand a chance against the enemies guarding it.",
-    "You've found a chest! Don't get too excited though, the enemies are going to take it back from you soon enough."
+    "You've made it to the second level, but don't get too excited. The enemies here are much stronger.",
+    "Welcome to the desert planet's second level. It's going to be much harder than the first one.",
+    "Congratulations on making it this far, but things are only going to get tougher from here on out.",
+    "You're still alive, but barely. The enemies on this planet are really tough, so you better watch out.",
+    "You got a bonus chest! It's probably full of useless items though.",
+    "You're lucky to have found that bonus chest. Too bad it's probably not worth much.",
+    "Congratulations, you found a bonus chest. Don't get too excited, it's probably just junk.",
+    "A chest appears before you, but you know deep down that you don't stand a chance against the enemies."
   ],
   "dodge": [
-    "You're like a sitting duck out here in the desert. The enemies can see you from a mile away.",
     "You're slow as molasses. The enemies can dodge your attacks with ease.",
     "You're trying to move, but it's like you're stuck in quicksand. The enemies are having a field day with you.",
-    "You try to dodge, but you're just not quick enough. The enemies are taking advantage of your slow movements."
+    "It's like you're swinging at thin air. The enemies are just too quick for you.",
+    "You swing and you miss! Maybe you need glasses or something.",
+    "What was that? It's like you're not even trying.",
+    "Nice try, but you missed! Looks like your aim is worse than your reflexes.",
+    "You swing your weapon, but the enemies dance circles around you. It's like they're playing with you.",
+    "You're like a clumsy child swinging a toy around. The enemies dodge effortlessly.",
+    "You're trying so hard to hit the enemies, but they're just too fast and agile for you. It's embarrassing."
   ]
 }

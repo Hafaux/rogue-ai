@@ -66,9 +66,9 @@ Please, provide ${Narrator.narrationsPerPrompt} short narrations sentences for e
 responses are in 2nd person. Do not react in present tense. Please output you answers in JSON format with
 the following scheme:
   {
-    'hit': [ <some of your answers reside here> ],
-    'levelup': [ <some - here> ],
-    'dodge': [ <and others - here> ]
+    'hit': [ <taunting the player that the enemies hit him> ],
+    'levelup': [ <the player performs somewhat ok> ],
+    'dodge': [ <taunting the player who fails to hit the enemies> ]
   }
 Make sure that you reference as much as possible the scene settings and the previous events. Also, even if the player is performing
 somewhat well, make sure that you are not favoring him and you are showing him who is the loser.`;
@@ -181,3 +181,19 @@ ${Narrator.narrationPromptEnd}
 
   get_audio() {}
 }
+
+Narrator.eventTransforms = new Map<string, (a: string, b: string) => string>();
+
+// a is probably 'enemy' and b will most likely be 'player' or 'enemy'.
+Narrator.eventTransforms.set("hit", (a: string, b: string) => {
+  return `The ${a} got hit by the ${b}`;
+});
+// a is probably 'player' or 'enemy' (maybe could be 'chest' - "This chest got annihilated!")
+// b could be 'bullet' or 'enemy'
+Narrator.eventTransforms.set("dodge", (a: string, b: string) => {
+  return `the ${a} dodged an attack by the ${b}`;
+});
+// a is probably 'player' or 'enemy'; b could be 'kill', 'chest'
+Narrator.eventTransforms.set("levelup", (a: string, b: string) => {
+  return `the ${a} levelled up because of the ${b}`;
+});
