@@ -25,6 +25,7 @@ import { CRTFilter } from "@pixi/filter-crt";
 import { GlitchFilter } from "@pixi/filter-glitch";
 import ShaderSystem from "../systems/ShaderSystem";
 import UiSystem from "../systems/UiSystem";
+import { Narration } from "@rogueai/backend/src/narrator/narrator";
 
 export const playerData = {
   level: 1,
@@ -38,6 +39,7 @@ export default class Game extends Scene {
   private enemies: Enemy[] = [];
   private entities: Entity[] = [];
   private projectiles: Projectile[] = [];
+  private narrations: Narration[] = [];
   private availableTargets: Map<string, Entity[]> = new Map<string, Entity[]>();
   systems: System[] = [];
   uiContainer!: Container;
@@ -195,14 +197,6 @@ export default class Game extends Scene {
   }
 
   initSystems(collisionMatrix: CollisionMatrix) {
-    this.enemySystem = new EnemySystem(
-      this.enemies,
-      this.player,
-      collisionMatrix,
-      this.worldSize
-    );
-    this.addSystem(this.enemySystem);
-
     const playerId = PlayerSystem.idNext();
     this.playerSystem = new PlayerSystem(
       this.player,
@@ -219,14 +213,26 @@ export default class Game extends Scene {
       })
       .then((resp) => {
         console.log("Adding narrationSystem()");
-        this.narrationSystem = new NarrationSystem(playerId);
+        this.narrationSystem = new NarrationSystem(playerId, this.narrations);
         Ticker.shared.add((delta) => {
           this.narrationSystem.update(delta);
         });
-
+        this.player.on("CHANGE_XP" as any, (newXp) => {
+          if (newXp >= 5) {
+            this.narrationSystem.grabNarration("levelup");
+          }
+        });
         this.addSystem(
           new ProjectileMoveSystem(this.projectiles, this.narrationSystem)
         );
+        this.enemySystem = new EnemySystem(
+          this.enemies,
+          this.player,
+          collisionMatrix,
+          this.worldSize,
+          this.narrationSystem
+        );
+        this.addSystem(this.enemySystem);
       });
 
     this.addSystem(this.playerSystem);

@@ -10,7 +10,7 @@ export default class Enemy extends Entity {
     this.defence = 100;
     this.speed = 5;
     this.type = "Enemy";
-    this.dodge = 100;
+    this.dodge = 60;
 
     this.attackPower = 10;
 
