@@ -14,16 +14,17 @@ export default class Enemy extends Entity {
 
     this.attackPower = 10;
 
-    // this.sprite = new Sprite(texture);
-    // this.sprite.scale.set(2);
+    this.sprite = new Sprite(texture);
+    this.sprite.anchor.set(0.5);
+    this.sprite.scale.set(2);
 
-    this.sprite = new Graphics();
+    // this.sprite = new Graphics();
 
-    this.sprite.beginFill(Math.random() * 16777215);
-    this.sprite.drawRect(-this.size / 2, -this.size / 2, this.size, this.size);
-    this.sprite.endFill();
+    // this.sprite.beginFill(Math.random() * 16777215);
+    // this.sprite.drawRect(-this.size / 2, -this.size / 2, this.size, this.size);
+    // this.sprite.endFill();
 
-    this.sprite.cacheAsBitmap = true;
+    // this.sprite.cacheAsBitmap = true;
 
     this.spriteContainer.addChild(this.sprite);
   }

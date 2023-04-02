@@ -16,7 +16,7 @@ export default class AssetGenerator {
   assets = {
     flat: [
       {
-        sd: "interior wall",
+        sd: "roof",
         gpt: "wall",
         file: "wall",
       },
@@ -34,16 +34,21 @@ export default class AssetGenerator {
       },
       {
         sd: "enemy",
-        gpt: "enemy",
+        gpt: "enemy1",
         file: "enemy1",
       },
       {
         sd: "foe",
-        gpt: "foe",
+        gpt: "enemy2",
         file: "enemy2",
       },
       {
-        sd: "decoration",
+        sd: "decoration1",
+        gpt: "decoration_item",
+        file: "decoration",
+      },
+      {
+        sd: "decoration2",
         gpt: "decoration_item",
         file: "decoration",
       },
@@ -86,7 +91,7 @@ export default class AssetGenerator {
 
   isometricPrompt(asset: string, descrition: string) {
     return {
-      prompt: `front view, ortographic, 3/4 top down, game asset of a ${asset}, ${descrition}`,
+      prompt: `front view, ortographic, 3/4 top down, game asset of ${descrition}`,
     };
   }
 
@@ -125,7 +130,7 @@ export default class AssetGenerator {
       promises.push(
         this.stableDiffusion.saveImage(
           { ...prompt, tiling: false, remove_background: true },
-          `./assets/input/${asset}.png`
+          `./assets/input/${asset.file}.png`
         )
       );
     }

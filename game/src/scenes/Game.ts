@@ -166,7 +166,11 @@ export default class Game extends Scene {
   }
 
   spawnEnemy(x = 0, y = 0) {
-    const enemy = new Enemy(this.spritesheet.textures.enemy);
+    const enemy = new Enemy(
+      tryChance(50)
+        ? this.spritesheet.textures.enemy1
+        : this.spritesheet.textures.enemy2
+    );
 
     enemy.x = x;
     enemy.y = y;
