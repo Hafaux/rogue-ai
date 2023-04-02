@@ -6,7 +6,7 @@ import { OutlineFilter } from "@pixi/filter-outline";
 export default class Projectile extends Container {
   sprite: Graphics;
   life = 1;
-  speed = 8;
+  speed = 10;
   creatorStats: {
     projectileLifespan: number;
     attackPower: number;
@@ -62,7 +62,7 @@ export default class Projectile extends Container {
     return !tryChance(hitTarget.dodge);
   }
 
-  onHit(hitTarget: Entity) {
+  async onHit(hitTarget: Entity) {
     // apply debufs calculate damage stuff like that
     // resists
     if (hitTarget.destroyed) return;
@@ -71,7 +71,7 @@ export default class Projectile extends Container {
     if (tryChance(this.creatorStats.critChance)) {
       damageValue *= this.creatorStats.critMultiplier;
     }
-    const { killed, killReward } = hitTarget.applyDamage(damageValue);
+    const { killed, killReward } = await hitTarget.applyDamage(damageValue);
     if (killed && !this.creator.destroyed) {
       this.creator.increaseXp(killReward);
     }
