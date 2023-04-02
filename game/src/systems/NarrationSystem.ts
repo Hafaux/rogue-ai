@@ -10,6 +10,7 @@ export default class NarrationSystem implements System {
   narrations: Narration[] = [];
   playerId: string;
   fetching: boolean;
+  currentSound?: Howl;
 
   constructor(playerId: string) {
     console.log("Constructing NarrationSystem");
@@ -45,27 +46,34 @@ export default class NarrationSystem implements System {
     // assert(this.narrations.length >= 3);
   }
 
-  grabNarration(narrationEvent: string): Narration {
+  grabNarration(narrationEvent: string) {
+    if (this.currentSound?.playing) return;
+
     for (const narration of [...this.narrations]) {
       if (narration.event == narrationEvent) {
-        trpc.storeNarration
-          .query({
-            playerId: this.playerId,
-            narrationSerial: JSON.stringify(narration),
-          })
-          .then(() => {
-            this.narrations.splice(this.narrations.indexOf(narration), 1);
-          });
+        // trpc.storeNarration
+        //   .query({
+        //     playerId: this.playerId,
+        //     narrationSerial: JSON.stringify(narration),
+        //   })
+        //   .then(() => {
+        //     this.narrations.splice(this.narrations.indexOf(narration), 1);
+        //   });
+
+        this.narrations.splice(this.narrations.indexOf(narration), 1);
 
         // FIXME: Move somewhere
-        console.warn(`EXPECT VOICE (maybe)`);
+        console.warn("EXPECT VOICE (maybe)");
         if (narration.audio_file?.length) {
-          console.warn(`!! + ${narration.audio_file}`);
-          new Howl({
+          this.currentSound = new Howl({
             src: [narration.audio_file],
             html5: true, // A live stream can only be played through HTML5 Audio.
             format: ["mp3"],
-          }).play();
+          });
+
+          this.currentSound.play();
+
+          console.log(this.currentSound);
         }
 
         return narration;

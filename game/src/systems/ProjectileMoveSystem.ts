@@ -23,12 +23,16 @@ export default class ProjectileMoveSystem implements System {
       const distance = getEntityDistance(projectile, projectile.target);
 
       //Projectile hit
-      if (distance < 20) {
+      if (distance < 50) {
         // entity hit function
         if (projectile.checkHit(projectile.target)) {
           projectile.onHit(projectile.target);
         } else {
-          this.narrationSystemRef.grabNarration("dodge");
+          try {
+            this.narrationSystemRef.grabNarration("dodge");
+          } catch (e) {
+            console.warn("FAILED TO GRAB VOICE FROM SERVER", e);
+          }
         }
         projectile.destroy();
         return;
