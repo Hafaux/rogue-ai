@@ -49,29 +49,26 @@ export default class NarrationSystem implements System {
     if (this.narrations.length <= 0) return;
     for (const narration of [...this.narrations]) {
       if (narration.event == narrationEvent) {
-        trpc.storeNarration
-          .query({
-            playerId: this.playerId,
-            narrationSerial: JSON.stringify(narration),
-          })
-          .then(() => {
-            this.narrations.splice(this.narrations.indexOf(narration), 1);
-          });
+        trpc.storeNarration.query({
+          playerId: this.playerId,
+          narrationSerial: JSON.stringify(narration),
+        });
 
         // FIXME: Move somewhere
         console.warn(`EXPECT VOICE (maybe)`);
         if (narration.audio_file?.length && !this.playing) {
           this.playing = true;
-          new Howl({
+          const audio = new Howl({
             src: [narration.audio_file],
             html5: true, // A live stream can only be played through HTML5 Audio.
             format: ["mp3"],
-          }).play();
+          });
+          audio.play();
+          audio.on("stop", () => {
+            this.playing = false;
+            this.narrations.splice(this.narrations.indexOf(narration), 1);
+          });
         }
-
-        setTimeout(() => {
-          this.playing = false;
-        }, 5000);
 
         return narration;
       }
