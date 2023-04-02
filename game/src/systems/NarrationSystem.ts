@@ -7,12 +7,11 @@ import { normalize } from "path/posix";
 import trpc from "../core/trpc";
 
 export default class NarrationSystem implements System {
-  narrations: Narration[] = [];
   playerId: string;
   fetching: boolean;
   playing: boolean;
 
-  constructor(playerId: string) {
+  constructor(playerId: string, private narrations: Narration[]) {
     console.log("Constructing NarrationSystem");
     this.playerId = playerId;
     this.fetching = false;
@@ -46,9 +45,10 @@ export default class NarrationSystem implements System {
     // assert(this.narrations.length >= 3);
   }
 
-  grabNarration(narrationEvent: string): Narration {
+  grabNarration(narrationEvent: string): Narration | undefined {
+    if (this.narrations.length <= 0) return;
     for (const narration of [...this.narrations]) {
-      if (narration?.event == narrationEvent) {
+      if (narration.event == narrationEvent) {
         trpc.storeNarration
           .query({
             playerId: this.playerId,

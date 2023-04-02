@@ -4,6 +4,7 @@ import Player from "../prefabs/Player";
 import { getDirection, getEntityDirection } from "../utils/game";
 import { utils } from "pixi.js";
 import Entity from "../prefabs/Entity";
+import NarrationSystem from "./NarrationSystem";
 
 export default class EnemySystem implements System {
   aStar: AStarFinder;
@@ -17,7 +18,8 @@ export default class EnemySystem implements System {
       tileSize: number;
       scale: number;
       readonly area: number;
-    }
+    },
+    private narrationSystemRef: NarrationSystem
   ) {
     this.aStar = new AStarFinder({
       grid: {
@@ -52,7 +54,7 @@ export default class EnemySystem implements System {
 
     if (distance < 70) {
       this.playerRef.applyDamage(enemy.attackPower);
-
+      this.narrationSystemRef.grabNarration("levelup");
       return;
     }
 
