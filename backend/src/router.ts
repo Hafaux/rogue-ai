@@ -41,7 +41,7 @@ export const appRouter = t.router({
       const player: Player = {
         id: input.playerId,
         theme: input.theme,
-        narrator: new Narrator(),
+        narrator: new Narrator(input.theme),
       };
       activePlayers.push(player);
       console.log(`Activating player ${JSON.stringify(player)}`);

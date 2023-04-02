@@ -46,23 +46,31 @@ export interface Voice {
 }
 
 export class Narrator {
-  private static narratorName = "You";
+  private static narratorName = "Narrator (You)";
 
-  private static narrationMarkers = [
-    "player performs well",
-    "player performs poorly",
-  ];
+  private static narrationMarkers = ["player performs poorly"];
+
+  public static eventTransforms: Map<string, (a: string, b: string) => string>;
+
+  private static narrationsPerPrompt = 3;
 
   private static narrationPromptBegin = `
-  You are an enemy in a rogue-like game.\n`;
+You are the announcer for an event that puts a player against multiple enemies in a fight in a rogue-like game.
+The scene is a`;
 
   private static narrationPromptEnd = `
-  Consider the following three scenarios and give suitable narration to each of them:
-  1. Player performs an action well. (Cheer him or/and compare to his previous attempts)
-  2. Performs performs an action poorly. (Taunt him)
-  Could you provide 3 short narrations sentences for both of them? Make sure that the
-  responses are in 2nd person. Do not react in present tense. Please output in JSON format
-  such as 'player performs well': [...], 'player performs poorly': [...].\n`;
+The player quite often performs a specific action poorly. You, as a narrator of the event, favoring his
+opponents, are supposed to taunt him. What follow are a couple of events which occur during the fight.
+Please, provide ${Narrator.narrationsPerPrompt} short narrations sentences for each of them. Make sure that the
+responses are in 2nd person. Do not react in present tense. Please output you answers in JSON format with
+the following scheme:
+  {
+    'hit': [ <some of your answers reside here> ],
+    'levelup': [ <some - here> ],
+    'dodge': [ <and others - here> ]
+  }
+Make sure that you reference as much as possible the scene settings and the previous events. Also, even if the player is performing
+somewhat well, make sure that you are not favoring him and you are showing him who is the loser.`;
 
   private static imaginaryNarrations = imaginaryNarrationsIncluded;
 
@@ -76,9 +84,23 @@ export class Narrator {
 
   private used: Narration[] = [];
   private feed: Narration[] = [];
+  private theme: string;
+
+  constructor(theme: string) {
+    this.theme = theme;
+  }
 
   useNarration(narration: Narration): void {
     this.used.push(narration);
+  }
+
+  prompt(): string {
+    return `${Narrator.narrationPromptBegin} ${this.theme}.
+Some of the previous actions that took place include:
+
+${this.history()}
+${Narrator.narrationPromptEnd}
+  `;
   }
 
   async nextBatch(): Promise<Narration[]> {
