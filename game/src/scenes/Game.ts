@@ -338,7 +338,7 @@ export default class Game extends Scene {
               const worldCoordsY =
                 y * this.worldSize.area + this.worldSize.area / 2;
 
-              const chest = new Chest(this.spritesheet.textures.enemy);
+              const chest = new Chest(this.spritesheet.textures.crate);
 
               chest.x = worldCoordsX;
               chest.y = worldCoordsY;
