@@ -3,7 +3,7 @@ import Scene from "../core/Scene";
 import { CompositeTilemap } from "@pixi/tilemap";
 
 import EnemySystem from "../systems/EnemySystem";
-import { Container, Ticker } from "pixi.js";
+import { Assets, Container, Spritesheet, Ticker } from "pixi.js";
 import PlayerSystem from "../systems/PlayerSystem";
 import { Sprite, Texture } from "pixi.js";
 import MapGenerator from "../core/MapGenerator";
@@ -14,18 +14,6 @@ import Enemy from "../prefabs/Enemy";
 import Entity from "../prefabs/Entity";
 import Projectile from "../prefabs/Projectile";
 import { getClosestTarget, removeIfDestroyed } from "../utils/game";
-
-// import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
-
-// import type { AppRouter } from "../../../backend/src/router";
-
-// const trpc = createTRPCProxyClient<AppRouter>({
-//   links: [
-//     httpBatchLink({
-//       url: "http://localhost:2023",
-//     }),
-//   ],
-// });
 
 export default class Game extends Scene {
   name = "Game";
@@ -72,7 +60,12 @@ export default class Game extends Scene {
   }
 
   async load() {
-    this.testTsEndpoints();
+    const spritesheet = new Spritesheet(
+      Texture.from("spritesheet"),
+      Assets.cache.get("atlasGen")
+    );
+
+    spritesheet.parse();
 
     this.worldSize = {
       tileSize: 32,
@@ -82,9 +75,6 @@ export default class Game extends Scene {
         return this.tileSize * this.scale;
       },
     };
-
-    // console.warn(await trpc.getNarration.query("1"));
-    console.log(this.projectiles);
 
     this.uiContainer = new Container();
 
@@ -225,7 +215,7 @@ export default class Game extends Scene {
           if (firstMap) collisionMatrix[y][x] = brightness < 0.01 ? 1 : 0;
 
           tilemap.tile(
-            brightness < 0.01 ? "brick.png" : "grass.png",
+            brightness < 0.01 ? "wall" : "floor",
             x * this.worldSize.tileSize,
             y * this.worldSize.tileSize
           );
@@ -265,7 +255,7 @@ export default class Game extends Scene {
   }
 
   spawnEnemies(collisionMatrix: CollisionMatrix) {
-    const secondsPerWave = 2;
+    const secondsPerWave = 4;
     const enemiesAmount = 4;
 
     setInterval(() => {
