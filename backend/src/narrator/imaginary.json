@@ -1,28 +1,20 @@
 {
-  "player performs well": [
-    "I wouldn't imagine that you could do that!",
-    "That wasn't as terrible as you usually do.",
-    "I do not think you could do any better than that (just because you never do any good).",
-    "You played better... than my gradmother... who is senile.",
-    "Hahah, you are not terrible sometimes!",
-    "WOW! You could play this game?!?! I thought that it had turned on my mistake in your pocket...",
-    "WHAAAAAAAAAAAAT?!",
-    "HAHALKJDF! That was pretty good."
+  "hit": [
+    "You swing your weapon, but the enemies dance circles around you. It's like they're playing with you.",
+    "You're like a clumsy child swinging a toy around. The enemies dodge effortlessly.",
+    "You're trying so hard to hit the enemies, but they're just too fast and agile for you. It's embarrassing.",
+    "It's like you're swinging at thin air. The enemies are just too quick for you."
   ],
-  "player performs poorly": [
-    "You play pathetically... as always.",
-    "You need to focus, you baby!",
-    "Another shot in the foot, ay?!",
-    "Stupid...",
-    "MEGAAA silliness",
-    "You better leave playing this game to people who can!",
-    "NOO! WHAT ARE YOU DOING?!?!",
-    "You are more of a coward than my dog.",
-    "A bunch of monkey clicking on the controls would do better.",
-    "Could YOU be any more dumber?!"
+  "levelup": [
+    "You stumble upon a chest, but don't get too excited. It's probably just filled with sand.",
+    "You found a chest! Too bad the enemies are just going to take it back once they defeat you.",
+    "A chest appears before you, but you know deep down that you don't stand a chance against the enemies guarding it.",
+    "You've found a chest! Don't get too excited though, the enemies are going to take it back from you soon enough."
   ],
-  "voices": {
-    "Cave Johnson": "0FWgWsI6gJeWvqv9Ckah",
-    "Wheatley": "XJ7gk0fiJegS2y8bDAUP"
-  }
+  "dodge": [
+    "You're like a sitting duck out here in the desert. The enemies can see you from a mile away.",
+    "You're slow as molasses. The enemies can dodge your attacks with ease.",
+    "You're trying to move, but it's like you're stuck in quicksand. The enemies are having a field day with you.",
+    "You try to dodge, but you're just not quick enough. The enemies are taking advantage of your slow movements."
+  ]
 }

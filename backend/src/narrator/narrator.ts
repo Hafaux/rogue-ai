@@ -6,6 +6,7 @@ import {
 } from "../api/elevenlabs_controller";
 import { GptController } from "../api/gpt_controller";
 import * as imaginaryNarrationsIncluded from "./imaginary.json";
+import * as voicesIncluded from "./voices.json";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 import path from "path";
@@ -75,10 +76,10 @@ somewhat well, make sure that you are not favoring him and you are showing him w
   private static imaginaryNarrations = imaginaryNarrationsIncluded;
 
   private voice: Voice = ((voice_name: string) => {
-    type VoicesKeys = keyof typeof imaginaryNarrationsIncluded.voices;
+    type VoicesKeys = keyof typeof voicesIncluded.voices;
     return {
       name: voice_name,
-      id: imaginaryNarrationsIncluded.voices[voice_name as VoicesKeys],
+      id: voicesIncluded.voices[voice_name as VoicesKeys],
     };
   })(CAVE_JOHNSON_NAME);
 

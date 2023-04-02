@@ -8,7 +8,7 @@ import fs from "fs";
 
 const TMP_MESSAGE = "You are trash!";
 const CAVE_AUDIO_FILE = "cave_quote.mp3";
-const NARRATOR_PRESETS_PATH = path.join("src", "narrator", "imaginary.json");
+const NARRATOR_PRESETS_PATH = path.join("src", "narrator", "voices.json");
 
 (async () => {
   try {
