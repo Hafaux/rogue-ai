@@ -270,11 +270,12 @@ export default class Loading extends Scene {
     console.warn(prompt.value);
 
     try {
-      throw null;
+      // throw null;
+      console.log("calling generateAssets");
 
       response = await trpc.generateAssets.query({
         playerId: "1",
-        theme: "neon wireframe",
+        theme: "sci-fi spaceship with electoronics",
       });
 
       console.warn("API RESPONSE", response);

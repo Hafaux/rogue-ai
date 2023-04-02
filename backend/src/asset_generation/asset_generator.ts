@@ -1,5 +1,8 @@
 import StableDiffusion, { StableResponse } from "../api/stable_diffusion";
-import SettingGenerator, { SettingResponse } from "./setting_generator";
+import SettingGenerator, {
+  AssetDefinition,
+  SettingResponse,
+} from "./setting_generator";
 import TexturePacker from "./texture_packer";
 
 export default class AssetGenerator {
@@ -11,9 +14,41 @@ export default class AssetGenerator {
   private setting: SettingResponse | null = null;
 
   assets = {
-    flat: ["wall", "floor"],
-    isometric: ["crate", "enemy", "misc"],
-  };
+    flat: [
+      {
+        sd: "interior wall",
+        gpt: "wall",
+        file: "wall",
+      },
+      {
+        sd: "ground",
+        gpt: "floor",
+        file: "floor",
+      },
+    ],
+    isometric: [
+      {
+        sd: "crate",
+        gpt: "crate",
+        file: "crate",
+      },
+      {
+        sd: "enemy",
+        gpt: "enemy",
+        file: "enemy1",
+      },
+      {
+        sd: "foe",
+        gpt: "foe",
+        file: "enemy2",
+      },
+      {
+        sd: "decoration",
+        gpt: "decoration_item",
+        file: "decoration",
+      },
+    ],
+  } as const;
   stableDiffusion: StableDiffusion;
 
   constructor() {
@@ -44,14 +79,14 @@ export default class AssetGenerator {
 
   flatPrompt(asset: string, descrition: string) {
     return {
-      prompt: `front view, ortographic, 3/4 top down, game asset of a ${asset} on a white background, ${descrition}`,
+      prompt: `top-down ${asset} texture, ${descrition}`,
+      negative_prompt: `landscape photography, depth`,
     };
   }
 
   isometricPrompt(asset: string, descrition: string) {
     return {
-      prompt: `top-down ${asset} texture, ${descrition}`,
-      negative_prompt: `landscape photography, depth`,
+      prompt: `front view, ortographic, 3/4 top down, game asset of a ${asset}, ${descrition}`,
     };
   }
 
@@ -60,25 +95,32 @@ export default class AssetGenerator {
 
     const setting = await this.getSetting();
 
+    console.log("setting", setting);
+
     const promises: Promise<unknown>[] = [];
 
     for (const asset of this.assets.flat) {
-      const description = setting.assets[asset].join(", ");
+      console.log("description", setting.assets, asset.gpt);
+      const description = setting.assets[asset.gpt].join(", ");
 
-      const prompt = this.flatPrompt(asset, description);
+      const prompt = this.flatPrompt(asset.sd, description);
+      console.log("prompt", prompt);
 
       promises.push(
         this.stableDiffusion.saveImage(
           { ...prompt, tiling: true, remove_background: false },
-          `./assets/input/${asset}.png`
+          `./assets/input/${asset.file}.png`
         )
       );
+      console.log("pusehd");
     }
 
     for (const asset of this.assets.isometric) {
-      const description = setting.assets[asset].join(", ");
+      console.log("description", setting.assets, asset.gpt);
 
-      const prompt = this.isometricPrompt(asset, description);
+      const description = setting.assets[asset.gpt].join(", ");
+
+      const prompt = this.isometricPrompt(asset.sd, description);
 
       promises.push(
         this.stableDiffusion.saveImage(
@@ -87,6 +129,8 @@ export default class AssetGenerator {
         )
       );
     }
+
+    console.log("promises", promises);
 
     await Promise.all(promises);
 

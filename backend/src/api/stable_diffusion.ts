@@ -46,6 +46,7 @@ export default class StableDiffusion {
   }
 
   async request(data: StableRequest) {
+    console.log("requesting sd", data);
     const response = (await axios.post(this.url, data, this.config))
       .data as StableResponse;
 

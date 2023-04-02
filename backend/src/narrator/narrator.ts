@@ -161,6 +161,8 @@ ${Narrator.narrationPromptEnd}
       // console.log(`marker: ${marker}`);
       // console.log(`data[marker]: ${data[marker]}`);
       for (const narration of data[marker]) {
+        continue; // TODO: remove this line
+
         const file_path: string = path.join(AUDIO_DIR_PATH, `${uuidv4()}.mp3`);
 
         let b64string: string = "";

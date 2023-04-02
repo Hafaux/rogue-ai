@@ -26,6 +26,8 @@ export const appRouter = t.router({
     .query(async (req) => {
       const input = req.input;
 
+      // console.log("called generateAssets");
+
       return await assetGenerator.generate(input.theme);
     }),
 
