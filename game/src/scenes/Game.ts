@@ -1,7 +1,6 @@
 import Player from "../prefabs/Player";
 import Scene from "../core/Scene";
 import { CompositeTilemap } from "@pixi/tilemap";
-
 import EnemySystem from "../systems/EnemySystem";
 import { Assets, Container, Spritesheet, Ticker } from "pixi.js";
 import PlayerSystem from "../systems/PlayerSystem";
@@ -22,6 +21,14 @@ import { groupCollapsed } from "console";
 import trpc from "../core/trpc";
 import { prompt } from "./StartMenu";
 import NarrationSystem from "../systems/NarrationSystem";
+import { CRTFilter } from "@pixi/filter-crt";
+import { GlitchFilter } from "@pixi/filter-glitch";
+import ShaderSystem from "../systems/ShaderSystem";
+import UiSystem from "../systems/UiSystem";
+
+export const playerData = {
+  level: 1,
+};
 
 export default class Game extends Scene {
   name = "Game";
@@ -42,6 +49,8 @@ export default class Game extends Scene {
   spritesheet!: Spritesheet;
 
   windowFocused = true;
+
+  filterTimer = 0;
 
   async testTsEndpoints() {
     // await trpc.activatePlayer.query({
@@ -78,9 +87,10 @@ export default class Game extends Scene {
 
   async load() {
     this.alpha = 0;
+
     gsap.to(this, {
       alpha: 1,
-      duration: 0.3,
+      duration: 0.5,
       ease: "linear",
     });
     this.testTsEndpoints();
@@ -116,7 +126,9 @@ export default class Game extends Scene {
     this.availableTargets.set("Enemy", [this.player]);
     this.availableTargets.set("Player", this.enemies);
 
-    this.initUi();
+    this.player.on("destroyed", () => {
+      this.utils.viewport.plugins.remove("follow");
+    });
 
     this.initSystems(this.collisionMatrix);
     this.addEntity(this.player);
@@ -178,194 +190,6 @@ export default class Game extends Scene {
     this.addChild(projectile);
   }
 
-  initUi() {
-    const hp = new StatElement("HP", 100, {
-      alpha: 0.8,
-    });
-
-    this.player.on("CHANGE_HP" as any, (newHp: number) => {
-      hp.update(newHp);
-    });
-
-    const xp = new StatElement("XP", 0, {
-      alpha: 0.8,
-      valueColor: 0x8888ff,
-    });
-
-    const level = new StatElement("LEVEL", 1, {
-      valueColor: 0xff00ff,
-    });
-
-    const stats = new Container();
-
-    const skillPointText = new StatElement("SKILL POINTS", 0, {
-      labelColor: 0xff00ff,
-      valueColor: 0xffff00,
-    });
-
-    stats.addChild(skillPointText);
-
-    // const statsMap = {
-
-    // }
-
-    skillPointText.visible = false;
-
-    skillPointText.y -= 200;
-    skillPointText.x -= 110;
-
-    this.player.on("CHANGE_XP" as any, () => {
-      const newXp = ++xp.value;
-
-      if (newXp >= 5) {
-        level.update(++level.value);
-        this.player.skillPoints++;
-
-        skillPointText.update(this.player.skillPoints);
-
-        skillPointText.visible = true;
-
-        xp.update(0);
-      } else {
-        xp.update(newXp);
-      }
-    });
-
-    level.scale.set(1.5);
-
-    level.x = window.innerWidth / 2 - level.width / 2;
-
-    xp.y = hp.height;
-    this.uiContainer.addChild(hp, xp, level);
-
-    const onPointAdd = (el: StatElement) => {
-      if (!this.player.skillPoints) return false;
-
-      this.player.skillPoints--;
-
-      skillPointText.update(this.player.skillPoints);
-
-      if (!this.player.skillPoints) {
-        skillPointText.visible = true;
-      }
-
-      console.warn(el.value + el.addAmount, el.label);
-      // Lord forgive me, for I have absolutely no time left to refactor this before the deadline
-      switch (el.label) {
-        case "ATK SPD": {
-          this.player.attackSpeed = el.value + el.addAmount;
-
-          break;
-        }
-        case "ATK PWR": {
-          this.player.attackPower = el.value + el.addAmount;
-
-          break;
-        }
-        case "CRT CHC": {
-          this.player.critChance = el.value + el.addAmount;
-
-          break;
-        }
-        case "DEF": {
-          this.player.defence = el.value + el.addAmount;
-
-          break;
-        }
-        case "SPD": {
-          this.player.speed = el.value + el.addAmount;
-
-          break;
-        }
-        case "DDG": {
-          this.player.dodge = el.value + el.addAmount;
-
-          break;
-        }
-      }
-
-      return true;
-    };
-
-    const attackPower = new StatElement(
-      "ATK PWR",
-      this.player.attackPower,
-      {
-        valueColor: 0xbb0000,
-      },
-      10,
-      onPointAdd
-    );
-
-    const attackSpeed = new StatElement(
-      "ATK SPD",
-      this.player.attackSpeed,
-      {
-        valueColor: 0xbb0000,
-      },
-      0.5,
-      onPointAdd
-    );
-
-    const critChance = new StatElement(
-      "CRT CHC",
-      this.player.critChance,
-      {
-        valueColor: 0xbb0000,
-      },
-      1,
-      onPointAdd
-    );
-
-    const defence = new StatElement(
-      "DEF",
-      this.player.defence,
-      {
-        valueColor: 0xbb0000,
-      },
-      5,
-      onPointAdd
-    );
-
-    const speed = new StatElement(
-      "SPD",
-      this.player.speed,
-      {
-        valueColor: 0xbb0000,
-      },
-      1,
-      onPointAdd
-    );
-
-    const dodge = new StatElement(
-      "DDG",
-      this.player.speed,
-      {
-        valueColor: 0xbb0000,
-      },
-      1,
-      onPointAdd
-    );
-    // have to hardcode them :(
-    attackSpeed.y -= attackPower.height * 2;
-    critChance.y -= attackPower.height;
-
-    defence.y -= attackPower.height * 2;
-    speed.y -= speed.height;
-
-    dodge.x -= attackPower.width;
-    speed.x -= attackPower.width;
-    defence.x -= attackPower.width;
-    stats.addChild(speed, critChance, dodge, attackPower, attackSpeed, defence);
-
-    stats.scale.set(0.9);
-
-    stats.x = this.utils.viewport.screenWidth - 300;
-    stats.y = this.utils.viewport.screenHeight - stats.height;
-
-    this.uiContainer.addChild(stats);
-  }
-
   initSystems(collisionMatrix: CollisionMatrix) {
     this.enemySystem = new EnemySystem(
       this.enemies,
@@ -403,6 +227,10 @@ export default class Game extends Scene {
 
     this.addSystem(this.playerSystem);
 
+    this.addSystem(new ShaderSystem(this, this.player));
+
+    this.addSystem(new UiSystem(this.player, this.uiContainer));
+
     this.addSystem(
       new EntityAttackSystem(
         this.entities,
@@ -413,10 +241,12 @@ export default class Game extends Scene {
 
     this.addSystem(new ChestSystem(this.chests, this.player));
 
-    Ticker.shared.add((delta) => {
-      this.updateSystems(delta);
-    });
+    Ticker.shared.add(this.updateSystemsFn);
   }
+
+  updateSystemsFn = ((delta: number) => {
+    this.updateSystems(delta);
+  }).bind(this);
 
   addBackground() {
     const mapGen = new MapGenerator(
@@ -508,8 +338,7 @@ export default class Game extends Scene {
     const enemiesAmount = 4;
 
     setInterval(() => {
-      // if (this.enemies.length > 20) return;
-      if (this.enemies.length > 0) return;
+      if (this.enemies.length > 20) return;
 
       const { current } = this.player.tileCoords;
 
@@ -573,6 +402,22 @@ export default class Game extends Scene {
   }
 
   updateSystems(delta: number) {
+    if (this.player.destroyed || this.destroyed) {
+      Ticker.shared.remove(this.updateSystemsFn);
+
+      playerData.level = this.player.level;
+
+      gsap.to(this.uiContainer, {
+        alpha: 0,
+      });
+
+      console.warn("OVER");
+
+      this.emit("OVER" as any);
+
+      return;
+    }
+
     //clean up
     removeIfDestroyed(this.entities);
     removeIfDestroyed(this.enemies);

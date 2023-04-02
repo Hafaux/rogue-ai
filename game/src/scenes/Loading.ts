@@ -281,7 +281,7 @@ export default class Loading extends Scene {
       console.warn("API RESPONSE", response);
     } catch (e) {
       // In case of server
-      // await wait(4);
+      await wait(4);
 
       console.warn(e);
 

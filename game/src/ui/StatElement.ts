@@ -24,7 +24,7 @@ export default class StatElement extends Container {
   ) {
     super();
 
-    this.cursor = "pointer";
+    if (addAmount) this.cursor = "pointer";
 
     this.labelText = createTextElement(label + ":", {
       fill: this.config.labelColor ?? 0xffffff,

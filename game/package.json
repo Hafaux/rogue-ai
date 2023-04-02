@@ -20,6 +20,8 @@
     "vite": "^4.0.4"
   },
   "dependencies": {
+    "@pixi/filter-crt": "^5.1.1",
+    "@pixi/filter-glitch": "^5.1.1",
     "@pixi/filter-outline": "^5.2.0",
     "@pixi/sound": "^5.0.0",
     "@pixi/tilemap": "^4.0.0",

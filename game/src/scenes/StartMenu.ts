@@ -45,11 +45,21 @@ export default class StartMenu extends Scene {
     start.cursor = "pointer";
 
     start.on("pointerenter", () => {
-      start.scale.set(1.4);
+      gsap.to(start, {
+        pixi: {
+          scale: 1.4,
+        },
+        ease: "elastic.out",
+      });
     });
 
     start.on("pointerleave", () => {
-      start.scale.set(1.0);
+      gsap.to(start, {
+        pixi: {
+          scale: 1.0,
+        },
+        ease: "elastic.out",
+      });
     });
 
     this.input = new Input({
@@ -75,7 +85,7 @@ export default class StartMenu extends Scene {
     this.prompt = createTextElement("", {
       wordWrap: true,
       wordWrapWidth: 350,
-      lineHeight: 25,
+      lineHeight: 30,
     });
 
     const inputMask = new Graphics();
