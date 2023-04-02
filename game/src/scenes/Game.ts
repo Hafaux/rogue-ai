@@ -44,10 +44,10 @@ export default class Game extends Scene {
   windowFocused = true;
 
   async testTsEndpoints() {
-    await trpc.activatePlayer.query({
-      playerId: "0",
-      theme: "space dystopia",
-    });
+    // await trpc.activatePlayer.query({
+    //   playerId: "0",
+    //   theme: "space dystopia",
+    // });
 
     // await trpc.checkPlayer.query({
     //   playerId: "0",
@@ -61,19 +61,13 @@ export default class Game extends Scene {
     //   playerId: "0",
     // });
 
-    const narations = JSON.parse(
-      await trpc.getNarration.query({
-        playerId: "0",
-      })
-    );
+    // const narations = JSON.parse(
+    //   await trpc.getNarration.query({
+    //     playerId: "0",
+    //   })
+    // );
 
-    console.log(narations[0].audio_file);
-
-    new Howl({
-      src: [narations[0].audio_file],
-      html5: true, // A live stream can only be played through HTML5 Audio.
-      format: ["mp3"],
-    }).play();
+    // console.log(narations[0].audio_file);
 
     // await trpc.storeNarration.query({
     //   playerId: "0",

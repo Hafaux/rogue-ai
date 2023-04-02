@@ -2,22 +2,25 @@ import { Ticker } from "@pixi/ticker";
 import { Narration, Narrator } from "@rogueai/backend/src/narrator/narrator";
 import {} from "@rogueai/backend/src/router";
 import { assert } from "console";
+import { Howl } from "howler";
 import { normalize } from "path/posix";
 import trpc from "../core/trpc";
 
 export default class NarrationSystem implements System {
   narrations: Narration[] = [];
   playerId: string;
+  fetching: boolean;
 
   constructor(playerId: string) {
     console.log("Constructing NarrationSystem");
     this.playerId = playerId;
-    this.update(0);
+    this.fetching = false;
   }
 
   update(delta: number) {
-    if (this.narrations.length <= 3) {
+    if (this.narrations.length <= 3 && !this.fetching) {
       this.fetchNarrations();
+      console.warn("Narration system: fetching narrations");
     }
 
     // assert(
@@ -27,14 +30,17 @@ export default class NarrationSystem implements System {
   }
 
   async fetchNarrations() {
-    this.waiting = true;
-    const narrationsSerial = await trpc.getNarration.query({
+    this.fetching = true;
+    const narrationsSerial: string = await trpc.getNarration.query({
       playerId: this.playerId,
     });
+
+    console.log("Narration ret: " + narrationsSerial);
     for (const narration of JSON.parse(narrationsSerial)) {
+      console.log(`Adding narration '${narration}'`);
       this.narrations.push(narration);
     }
-    this.waiting = false;
+    this.fetching = false;
     // assert(this.narrations.length >= 3);
   }
 
@@ -49,6 +55,14 @@ export default class NarrationSystem implements System {
           .then(() => {
             this.narrations.splice(this.narrations.indexOf(narration), 1);
           });
+
+        // FIXME: Move somewhere
+        new Howl({
+          src: [narration.audio_file],
+          html5: true, // A live stream can only be played through HTML5 Audio.
+          format: ["mp3"],
+        }).play();
+
         return narration;
       }
     }

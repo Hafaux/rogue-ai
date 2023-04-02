@@ -134,7 +134,8 @@ ${Narrator.narrationPromptEnd}
     let used = this.used;
     if (this.used.length == 0) {
       used = await this.parseNarrationListing(
-        JSON.stringify(Narrator.imaginaryNarrations)
+        JSON.stringify(Narrator.imaginaryNarrations),
+        false
       );
     }
 
@@ -150,7 +151,10 @@ ${Narrator.narrationPromptEnd}
     return history;
   }
 
-  private async parseNarrationListing(_data: any): Promise<Narration[]> {
+  private async parseNarrationListing(
+    _data: any,
+    audio: boolean = false
+  ): Promise<Narration[]> {
     const data = JSON.parse(_data);
     let narrations: Narration[] = [];
     for (const marker of Narrator.eventTransforms.keys()) {
@@ -159,31 +163,34 @@ ${Narrator.narrationPromptEnd}
       for (const narration of data[marker]) {
         const file_path: string = path.join(AUDIO_DIR_PATH, `${uuidv4()}.mp3`);
 
-        const audio_stream = await ElevenLabsController.tts_stream(
-          narration,
-          this.voice.id
-        );
+        let base64string: string = "";
+        if (audio) {
+          const audio_stream = await ElevenLabsController.tts_stream(
+            narration,
+            this.voice.id
+          );
 
-        console.log("---------------------------------------_");
+          console.log("---------------- 11LABS ----------------");
 
-        // audio_stream?.pipe(fs.createWriteStream(file_path));
+          audio_stream?.pipe(fs.createWriteStream(file_path));
 
-        const b64string = await new Promise<string>((resolve, reject) => {
-          const chunks: Uint8Array[] = [];
-          audio_stream?.on("data", function (chunk) {
-            chunks.push(chunk);
+          const b64string = await new Promise<string>((resolve, reject) => {
+            const chunks: Uint8Array[] = [];
+            audio_stream?.once("data", function (chunk) {
+              chunks.push(chunk);
+            });
+            audio_stream?.once("end", function () {
+              var result = Buffer.concat(chunks);
+              console.log("final result:", result.length);
+              resolve("data:audio/mp3;base64," + result.toString("base64"));
+            });
           });
-          audio_stream?.on("end", function () {
-            var result = Buffer.concat(chunks);
-            console.log("final result:", result.length);
-            resolve("data:audio/mp3;base64," + result.toString("base64"));
-          });
-        });
+        }
 
         narrations.push({
           event: marker,
           response: narration,
-          audio_file: b64string,
+          audio_file: base64string,
           details: "[fill on storeNarration()]", // Initially empty.
         });
       }
@@ -201,7 +208,8 @@ ${Narrator.narrationPromptEnd}
     const suggestedNarrations: object = GptController.extractJson(answer);
     // console.log(suggestedNarrations);
     const newFeed = await this.parseNarrationListing(
-      JSON.stringify(suggestedNarrations)
+      JSON.stringify(suggestedNarrations),
+      true
     );
     for (const n of newFeed) {
       this.feed.push(n);
