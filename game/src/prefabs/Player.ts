@@ -48,4 +48,9 @@ export default class Player extends Entity {
 
     this.addChild(this.sprite);
   }
+  applyDamage(damage: number) {
+    const result = super.applyDamage(damage);
+
+    return result;
+  }
 }

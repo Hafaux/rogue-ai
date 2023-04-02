@@ -17,8 +17,11 @@ import { getClosestTarget, removeIfDestroyed, tryChance } from "../utils/game";
 import Chest from "../prefabs/Chest";
 import ChestSystem from "../systems/ChestSystem";
 import { gsap } from "gsap";
-import trpc, { TRPC_URL } from "../core/trpc";
 import { Howl, Howler } from "howler";
+import { groupCollapsed } from "console";
+import trpc from "../core/trpc";
+import { prompt } from "./StartMenu";
+import NarrationSystem from "../systems/NarrationSystem";
 
 export default class Game extends Scene {
   name = "Game";
@@ -33,6 +36,7 @@ export default class Game extends Scene {
   uiContainer!: Container;
   enemySystem!: EnemySystem;
   playerSystem!: PlayerSystem;
+  narrationSystem!: NarrationSystem;
   worldSize!: { tileSize: number; scale: number; readonly area: number };
   collisionMatrix!: CollisionMatrix;
   spritesheet!: Spritesheet;
@@ -312,11 +316,18 @@ export default class Game extends Scene {
     );
     this.addSystem(this.enemySystem);
 
+    const playerId = PlayerSystem.idNext();
     this.playerSystem = new PlayerSystem(
       this.player,
       collisionMatrix,
-      this.worldSize
+      this.worldSize,
+      playerId
     );
+
+    trpc.activatePlayer.query({
+      playerId: playerId,
+      theme: prompt.value,
+    });
 
     this.addSystem(this.playerSystem);
 
@@ -333,6 +344,11 @@ export default class Game extends Scene {
 
     Ticker.shared.add((delta) => {
       this.updateSystems(delta);
+    });
+
+    this.narrationSystem = new NarrationSystem(playerId);
+    Ticker.shared.add((delta) => {
+      this.narrationSystem.update(delta);
     });
   }
 

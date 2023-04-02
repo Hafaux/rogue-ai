@@ -1,8 +1,16 @@
 import Keyboard from "../core/Keyboard";
 import Player from "../prefabs/Player";
+import trpc from "../core/trpc";
 
 export default class PlayerSystem implements System {
   private keyboard = Keyboard.getInstance();
+
+  private static idCounter: number = 0;
+
+  public static idNext(): string {
+    this.idCounter++;
+    return this.idCounter.toString();
+  }
 
   movementState: {
     UP: boolean;
@@ -18,7 +26,8 @@ export default class PlayerSystem implements System {
       tileSize: number;
       scale: number;
       readonly area: number;
-    }
+    },
+    private playerId: string
   ) {
     this.keyboard.onAction(({ action, buttonState }) => {
       if (buttonState === "pressed") this.onActionPress(action);
