@@ -17,7 +17,7 @@ export default class SettingGenerator {
             a json format, the setting is an array of keywords that describe the setting,\
             the assets property describes each asset, in a key value pair, where the key\
             is the name of the asset and the value is an array of keywords and phrases that describe how a single asset looks\
-            (one noun word of what the item is + defining visual details and characteristics), for the following assets: ${assets
+            (one noun word of what the item is (example: wooden chest, robot, alien, etc.) + defining visual details and characteristics (example: green spikes, cracked bricks, etc.)), for the following assets: ${assets
               .map((a) => a.gpt)
               .join(", ")}.`;
   }
