@@ -1,4 +1,4 @@
-import { ColorMatrixFilter, Sprite } from "pixi.js";
+import { ColorMatrixFilter, Graphics, Sprite } from "pixi.js";
 import Scene from "../core/Scene";
 import { centerObjects } from "../utils/misc";
 import { createTextElement } from "../ui/StatElement";
@@ -74,8 +74,21 @@ export default class StartMenu extends Scene {
 
     this.prompt = createTextElement("", {
       wordWrap: true,
-      wordWrapWidth: 10,
+      wordWrapWidth: 350,
+      lineHeight: 25,
     });
+
+    const inputMask = new Graphics();
+
+    inputMask.cacheAsBitmap = true;
+
+    const maskWidth = 400;
+
+    this.prompt.mask = inputMask;
+
+    inputMask.beginFill(0xff0000);
+    inputMask.drawRect(-maskWidth / 2, 0, maskWidth, 90);
+    inputMask.endFill();
 
     document.addEventListener("keydown", (e) => {
       if (e.code === "Backspace") {
@@ -112,8 +125,11 @@ export default class StartMenu extends Scene {
       controls,
       this.input,
       this.prompt,
-      promptLabel
+      promptLabel,
+      inputMask
     );
+
+    inputMask.y += 80;
 
     promptLabel.y += 80;
 
@@ -144,7 +160,8 @@ export default class StartMenu extends Scene {
       controls,
       this.input,
       this.prompt,
-      promptLabel
+      promptLabel,
+      inputMask
     );
   }
 

@@ -29,6 +29,7 @@ export default class StatElement extends Container {
     this.labelText = createTextElement(label + ":", {
       fill: this.config.labelColor ?? 0xffffff,
     });
+
     this.valueText = createTextElement(this.getValueStr(value), {
       fill: this.config.valueColor ?? 0xffff00,
     });
