@@ -10,11 +10,13 @@ export default class NarrationSystem implements System {
   narrations: Narration[] = [];
   playerId: string;
   fetching: boolean;
+  playing: boolean;
 
   constructor(playerId: string) {
     console.log("Constructing NarrationSystem");
     this.playerId = playerId;
     this.fetching = false;
+    this.playing = false;
   }
 
   update(delta: number) {
@@ -31,14 +33,13 @@ export default class NarrationSystem implements System {
   }
 
   async fetchNarrations() {
+    if (this.fetching) return;
     this.fetching = true;
     const narrationsSerial: string = await trpc.getNarration.query({
       playerId: this.playerId,
     });
 
-    console.log("Narration ret: " + narrationsSerial);
     for (const narration of JSON.parse(narrationsSerial)) {
-      console.log(`Adding narration '${narration}'`);
       this.narrations.push(narration);
     }
     this.fetching = false;
@@ -59,14 +60,18 @@ export default class NarrationSystem implements System {
 
         // FIXME: Move somewhere
         console.warn(`EXPECT VOICE (maybe)`);
-        if (narration.audio_file?.length) {
-          console.warn(`!! + ${narration.audio_file}`);
+        if (narration.audio_file?.length && !this.playing) {
+          this.playing = true;
           new Howl({
             src: [narration.audio_file],
             html5: true, // A live stream can only be played through HTML5 Audio.
             format: ["mp3"],
           }).play();
         }
+
+        setTimeout(() => {
+          this.playing = false;
+        }, 5000);
 
         return narration;
       }
