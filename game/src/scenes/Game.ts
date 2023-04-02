@@ -324,10 +324,19 @@ export default class Game extends Scene {
       playerId
     );
 
-    trpc.activatePlayer.query({
-      playerId: playerId,
-      theme: prompt.value,
-    });
+    console.log("Calling activatePlayer()");
+    trpc.activatePlayer
+      .query({
+        playerId: playerId,
+        theme: prompt.value,
+      })
+      .then((resp) => {
+        console.log("Adding narrationSystem()");
+        this.narrationSystem = new NarrationSystem(playerId);
+        Ticker.shared.add((delta) => {
+          this.narrationSystem.update(delta);
+        });
+      });
 
     this.addSystem(this.playerSystem);
 
@@ -344,11 +353,6 @@ export default class Game extends Scene {
 
     Ticker.shared.add((delta) => {
       this.updateSystems(delta);
-    });
-
-    this.narrationSystem = new NarrationSystem(playerId);
-    Ticker.shared.add((delta) => {
-      this.narrationSystem.update(delta);
     });
   }
 

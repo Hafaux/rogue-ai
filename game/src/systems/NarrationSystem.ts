@@ -8,18 +8,10 @@ import trpc from "../core/trpc";
 export default class NarrationSystem implements System {
   narrations: Narration[] = [];
   playerId: string;
-  waiting: boolean = false;
-  startTime: number = 0;
-  endTime: number = 0;
-
-  // Limit comments to 1 each 10 seconds.
-  available: boolean = true;
 
   constructor(playerId: string) {
+    console.log("Constructing NarrationSystem");
     this.playerId = playerId;
-    this.startTime = Ticker.shared.elapsedMS / 1000;
-    this.endTime = this.startTime;
-
     this.update(0);
   }
 

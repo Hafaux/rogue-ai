@@ -5,7 +5,7 @@ import trpc from "../core/trpc";
 export default class PlayerSystem implements System {
   private keyboard = Keyboard.getInstance();
 
-  private static idCounter: number = 0;
+  private static idCounter: number = -1;
 
   public static idNext(): string {
     this.idCounter++;
