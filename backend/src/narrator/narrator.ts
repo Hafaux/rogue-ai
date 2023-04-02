@@ -9,6 +9,7 @@ import * as imaginaryNarrationsIncluded from "./imaginary.json";
 import { v4 as uuidv4 } from "uuid";
 import path from "path";
 import concat from "concat-stream";
+import fs from "fs";
 
 // Spec :D
 // -------
@@ -127,17 +128,27 @@ export class Narrator {
           narration,
           this.voice.id
         );
-        audio_stream;
 
         console.log("---------------------------------------_");
 
-        const a = audio_stream?.read();
-        console.log("File saved successfully: ", a, audio_stream);
+        // audio_stream?.pipe(fs.createWriteStream(file_path));
+
+        const b64string = await new Promise<string>((resolve, reject) => {
+          const chunks: Uint8Array[] = [];
+          audio_stream?.on("data", function (chunk) {
+            chunks.push(chunk);
+          });
+          audio_stream?.on("end", function () {
+            var result = Buffer.concat(chunks);
+            console.log("final result:", result.length);
+            resolve("data:audio/mp3;base64," + result.toString("base64"));
+          });
+        });
 
         narrations.push({
           event: marker,
           response: narration,
-          audio_file: "a",
+          audio_file: b64string,
         });
       }
     }

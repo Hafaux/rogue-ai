@@ -60,7 +60,9 @@ export default class Game extends Scene {
     console.log(narations[0].audio_file);
 
     new Howl({
-      src: TRPC_URL + narations[0].audio_file,
+      src: [narations[0].audio_file],
+      html5: true, // A live stream can only be played through HTML5 Audio.
+      format: ["mp3"],
     }).play();
 
     // await trpc.storeNarration.query({
