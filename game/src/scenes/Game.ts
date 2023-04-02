@@ -29,6 +29,7 @@ export default class Game extends Scene {
   playerSystem!: PlayerSystem;
   worldSize!: { tileSize: number; scale: number; readonly area: number };
   collisionMatrix!: CollisionMatrix;
+  spritesheet!: Spritesheet;
 
   async testTsEndpoints() {
     // await trpc.activatePlayer.query({
@@ -60,12 +61,12 @@ export default class Game extends Scene {
   }
 
   async load() {
-    const spritesheet = new Spritesheet(
+    this.spritesheet = new Spritesheet(
       Texture.from("spritesheet"),
       Assets.cache.get("atlasGen")
     );
 
-    spritesheet.parse();
+    this.spritesheet.parse();
 
     this.worldSize = {
       tileSize: 32,
@@ -121,7 +122,7 @@ export default class Game extends Scene {
   }
 
   spawnEnemy(x = 0, y = 0) {
-    const enemy = new Enemy();
+    const enemy = new Enemy(this.spritesheet.textures.enemy);
 
     enemy.x = x;
     enemy.y = y;
