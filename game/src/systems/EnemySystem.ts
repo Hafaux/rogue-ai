@@ -44,8 +44,6 @@ export default class EnemySystem implements System {
   }
 
   playerCollision(enemy: Enemy, delta: number) {
-    this.setTileCoords(enemy);
-
     const {
       distance,
       vec: vecPlayer,
@@ -57,6 +55,18 @@ export default class EnemySystem implements System {
 
       return;
     }
+
+    if (distance > 1000 && enemy.filters?.length) {
+      enemy.filters = [];
+
+      return;
+    }
+
+    if (!enemy.filters?.length) {
+      enemy.filters = [enemy.outlineFilter];
+    }
+
+    this.setTileCoords(enemy);
 
     if (enemy.pathToTarget.length <= 1) {
       enemy.rotation = angleToPlayer;

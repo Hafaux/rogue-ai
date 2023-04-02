@@ -413,7 +413,7 @@ export default class Game extends Scene {
     const enemiesAmount = 4;
 
     setInterval(() => {
-      if (this.enemies.length > 40) return;
+      if (this.enemies.length > 20) return;
 
       const { current } = this.player.tileCoords;
 

@@ -1,9 +1,10 @@
-import { Container, ColorMatrixFilter } from "pixi.js";
+import { Container, ColorMatrixFilter, Graphics } from "pixi.js";
 import { getClosestTarget, getEntityDirection } from "../utils/game";
 import Projectile from "./Projectile";
 import { wait } from "../utils/misc";
 
 import { OutlineFilter } from "@pixi/filter-outline";
+import gsap from "gsap";
 
 export default class Entity extends Container {
   type = "";
@@ -62,17 +63,32 @@ export default class Entity extends Container {
   };
 
   colorFilter: ColorMatrixFilter;
+  outlineFilter: OutlineFilter;
 
   constructor() {
     super();
 
     this.colorFilter = new ColorMatrixFilter();
-    const outlineFilter = new OutlineFilter(5);
+    this.outlineFilter = new OutlineFilter(5);
 
-    this.filters = [outlineFilter, this.colorFilter];
+    this.addHpBar();
+
+    this.filters = [this.outlineFilter, this.colorFilter];
   }
 
-  applyDamage(damage: number) {
+  addHpBar() {
+    const hpBar = new Graphics();
+
+    hpBar.beginFill(0xff0000);
+
+    const hpBarSize = this.size * 2;
+    hpBar.drawRect(-hpBarSize / 2, -this.size + 5, this.size * 2, 5);
+    hpBar.endFill();
+
+    this.addChild(hpBar);
+  }
+
+  async applyDamage(damage: number) {
     if (!this.iframeActive) {
       this.colorFilter.negative(true);
 
@@ -83,6 +99,15 @@ export default class Entity extends Container {
       this.hp -= damage;
       this.emit("CHANGE_HP" as any, this.hp);
       if (this.hp <= 0) {
+        await gsap.to(this, {
+          pixi: {
+            scale: 2,
+            alpha: 0,
+          },
+          duration: 0.2,
+          ease: "linear",
+        });
+
         this.destroy();
         return { killed: true, killReward: this.killReward };
       }
