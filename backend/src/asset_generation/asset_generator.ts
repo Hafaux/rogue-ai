@@ -42,16 +42,16 @@ export default class AssetGenerator {
         gpt: "enemy2",
         file: "enemy2",
       },
-      {
-        sd: "decoration1",
-        gpt: "decoration_item",
-        file: "decoration",
-      },
-      {
-        sd: "decoration2",
-        gpt: "decoration_item",
-        file: "decoration",
-      },
+      // {
+      //   sd: "decoration1",
+      //   gpt: "decoration_item",
+      //   file: "decoration",
+      // },
+      // {
+      //   sd: "decoration2",
+      //   gpt: "decoration_item",
+      //   file: "decoration",
+      // },
     ],
   } as const;
   stableDiffusion: StableDiffusion;
@@ -138,8 +138,6 @@ export default class AssetGenerator {
     console.log("promises", promises);
 
     await Promise.all(promises);
-
-    await new Promise((res) => setTimeout(res, 1000));
 
     return await this.texturePacker.pack();
   }

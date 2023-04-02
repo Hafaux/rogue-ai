@@ -275,7 +275,7 @@ export default class Loading extends Scene {
 
       response = await trpc.generateAssets.query({
         playerId: "1",
-        theme: "sci-fi spaceship with electoronics",
+        theme: prompt.value,
       });
 
       console.warn("API RESPONSE", response);

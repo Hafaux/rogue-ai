@@ -215,7 +215,7 @@ export default class Game extends Scene {
     trpc.activatePlayer
       .query({
         playerId: playerId,
-        theme: prompt.value,
+        theme: prompt.value || "random",
       })
       .then((resp) => {
         console.log("Adding narrationSystem()");

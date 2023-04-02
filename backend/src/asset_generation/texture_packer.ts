@@ -5,6 +5,9 @@ import sharp from "sharp";
 import glob from "glob";
 import path from "path";
 
+sharp.cache({ files: 0 });
+sharp.cache(false);
+
 export type SheetOptions = {
   border: number;
   sheetDimension: number;
@@ -101,6 +104,12 @@ export default class TexturePacker {
   async pack() {
     let inPath = this.inputPath;
 
+    let i = 0;
+    glob.sync(inPath + "*").forEach((file) => {
+      i++;
+    });
+    console.log("asset count", i);
+
     await sharpsheet(inPath + "*.png", this.outputPath, this.options);
 
     const jsonPath = this.outputPath + this.options.outputFilename;
@@ -109,7 +118,14 @@ export default class TexturePacker {
 
     const pixiSheet = this.convertToPIXI(sharpSheetOut);
 
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     const imageData = fs.readFileSync(this.outputPath + pixiSheet.meta.image);
+
+    // delete files
+    glob.sync(inPath + "*").forEach((file) => {
+      fs.unlinkSync(file);
+    });
+    fs.unlinkSync(this.outputPath + pixiSheet.meta.image);
 
     return { atlas: pixiSheet, image: imageData.toString("base64") };
   }
