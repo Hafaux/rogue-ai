@@ -10,9 +10,13 @@ export default class Projectile extends Container {
     projectileLifespan: number;
     attackPower: number;
     type: string;
+    critChance: number;
+    critMultiplier: number;
   } = {
     projectileLifespan: 0,
     attackPower: 0,
+    critChance: 0,
+    critMultiplier: 0,
     type: "",
   };
   constructor(
@@ -57,9 +61,12 @@ export default class Projectile extends Container {
     // apply debufs calculate damage stuff like that
     // resists
     if (hitTarget.destroyed) return;
-    const { killed, killReward } = hitTarget.applyDamage(
-      this.creatorStats.attackPower
-    );
+    let damageValue =
+      this.creatorStats.attackPower * (100 / (100 + hitTarget.defence));
+    if (tryChance(this.creatorStats.critChance)) {
+      damageValue *= this.creatorStats.critMultiplier;
+    }
+    const { killed, killReward } = hitTarget.applyDamage(damageValue);
     if (killed && !this.creator.destroyed) {
       this.creator.increaseXp(killReward);
     }

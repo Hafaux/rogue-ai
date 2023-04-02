@@ -7,6 +7,8 @@ export default class Enemy extends Entity {
   constructor(public texture: Texture, public hp = 10) {
     super();
     this.speed = 2;
+    this.hp = 100;
+    this.defence = 100;
     this.type = "Enemy";
 
     // this.sprite = new Sprite(texture);

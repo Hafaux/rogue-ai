@@ -18,6 +18,7 @@ export default class Player extends Entity {
     this.attackPower = 100;
     this.speed = 10;
     this.size = 30;
+    this.defence = 100;
 
     this.velocity = {
       x: 0,

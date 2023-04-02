@@ -13,8 +13,8 @@ export default class Entity extends Container {
   attackSpeed = 100;
   lastAttackTime = Number.MIN_SAFE_INTEGER;
   attackPower = 1;
-  critChance = 1;
-  critMultiplier = 1;
+  critChance = 0;
+  critMultiplier = 2;
 
   pathToTarget: number[][] = [];
   currentPathTarget: {
